@@ -1,3 +1,4 @@
+const Dao = require('./dao/Dao')
 const DatabaseMetadataProxy = require('./database/DatabaseMetadataProxy')
 const DatabaseProxy = require('./database/DatabaseProxy')
 
@@ -5,7 +6,27 @@ class Nordic {
   initialize({ host, port, database, user, password }) {
     this.$databaseProxy = new DatabaseProxy({ host, port, database, user, password })
   }
-  getDao() {
+  async getDao(daoClassOrTableName) {
+    if (typeof daoClassOrTableName === 'function') {
+      return new daoClassOrTableName(this.$databaseProxy)
+    } else {
+      let context = {}
+      if (typeof daoClassOrTableName === 'string') {
+        context = this.$getDaoContextFromString(daoClassOrTableName)
+      } else if (typeof daoClassOrTableName === 'object') {
+        let { schema, table } = daoClassOrTableName
+        context = this.$getDaoContextFromObject(schema, table)
+      } else {
+        throw new Error(`Can't create Dao instance`)
+      }
+      return new Dao(context, this.$databaseProxy)
+    }
+  }
+  $getDaoContextFromString(table) {
+    return { schema: 'public', table }
+  }
+  $getDaoContextFromObject(schema, table) {
+    return { schema, table }
   }
   async getDatabaseMetadata() {
     if (!this.$databaseMetadata) {
