@@ -1,0 +1,30 @@
+{
+  "name": "nordic",
+  "version": "0.1.0",
+  "description": "Another nodejs ORM for postgres. Serverless and lightweight approach.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jtouzy/nordic.git"
+  },
+  "keywords": [
+    "node",
+    "orm",
+    "postgres",
+    "serverless",
+    "lightweight"
+  ],
+  "author": "Jérémy TOUZY <jtouzy2@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jtouzy/nordic/issues"
+  },
+  "homepage": "https://github.com/jtouzy/nordic#readme",
+  "dependencies": {
+    "lodash.camelcase": "^4.3.0",
+    "pg": "^7.7.1"
+  }
+}
