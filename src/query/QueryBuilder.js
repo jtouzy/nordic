@@ -14,7 +14,7 @@ class QueryBuilder {
     }
   }
   getFromClauseWithTableMetadata(tableMetadata) {
-    return `${tableMetadata.schema}.${tableMetadata.name} as ${tableMetadata.name}`
+    return `${tableMetadata.schema}.${tableMetadata.name} AS ${tableMetadata.name}`
   }
   getConditionsWithObject(conditionsObject) {
     const conditionKeys = Object.keys(conditionsObject || {})
