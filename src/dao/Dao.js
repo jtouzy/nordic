@@ -14,7 +14,10 @@ class Dao {
     const conditionsObject = this.$getConditionsObjectFromArgument(identifier)
     const query = this.$queryBuilder.getSelectQueryWithConditionsObject(this.$tableMetadata, conditionsObject)
     const result = await this.$databaseProxy.query(query)
-    return this.$dataProxy.databaseToObject(result)
+    if (result.length > 1) {
+      throw new Error(`Multiple rows fetched from database in a findOne() query`)
+    }
+    return result.length === 0 ? result : this.$dataProxy.databaseToObject(result[0])
   }
   $getConditionsObjectFromArgument(argument) {
     if (typeof argument === 'string') {
