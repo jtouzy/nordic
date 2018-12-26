@@ -1,26 +1,30 @@
 const toCamelCase = require('lodash.camelcase')
+const toSnakeCase = require('lodash.snakecase')
 
 class DataProxy {
   constructor() {
   }
   databaseToObject(data) {
+    return this.$processData(data, toCamelCase)
+  }
+  objectToDatabase(data) {
+    return this.$processData(data, toSnakeCase)
+  }
+  $processData(data, transformFn) {
     if (Array.isArray(data)) {
-      return data.map((d) => this.$processData(d))
+      return data.map((d) => this.$transformDeeply(d, transformFn))
     } else {
-      return this.$processData(data)
+      return this.$transformDeeply(data, transformFn)
     }
   }
-  $processData(data) {
-    return this.$transformToCamelCaseDeeply(data)
-  }
-  $transformToCamelCaseDeeply(data) {
+  $transformDeeply(data, transformFn) {
     if (typeof data === 'object' && data !== null && !(data instanceof Date)) {
       return Object.keys(data).reduce((newObject, key) => {
-        newObject[toCamelCase(key)] = this.$transformToCamelCaseDeeply(data[key])
+        newObject[transformFn(key)] = this.$transformDeeply(data[key], transformFn)
         return newObject
       }, {})
     } else if (Array.isArray(data)) {
-      return data.map((d) => this.$transformToCamelCaseDeeply(d))
+      return data.map((d) => this.$transformDeeply(d, transformFn))
     } else {
       return data
     }
