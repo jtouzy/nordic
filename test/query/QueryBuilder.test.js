@@ -3,8 +3,8 @@ const QueryBuilder = require('../../src/query/QueryBuilder')
 
 describe('QueryBuilder.getFromClauseWithTableMetadata', () => {
   it('Should generate FROM clause with alias', () => {
-    const sut = new QueryBuilder()
-    const fromClause = sut.getFromClauseWithTableMetadata({ name: 'articles', schema: 'secured' })
+    const sut = new QueryBuilder({ name: 'articles', schema: 'secured' })
+    const fromClause = sut.getFromClauseWithTableMetadata()
     expect(fromClause).to.be.equal('secured.articles AS articles')
   })
 })

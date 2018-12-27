@@ -23,10 +23,9 @@ class Nordic {
       daoInstance = new Dao(context)
     }
     // Inject
-    return Object.assign(daoInstance, {
-      $databaseProxy: this.$databaseProxy,
-      $tableMetadata: await this.getTableMetadata(daoInstance.$context)
-    })
+    const tableMetadata = await this.getTableMetadata(daoInstance.$context)
+    daoInstance.$inject(this.$databaseProxy, tableMetadata)
+    return daoInstance
   }
   $getDaoContextFromString(table) {
     return { schema: 'public', table }

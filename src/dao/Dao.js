@@ -8,11 +8,15 @@ class Dao {
     }
     this.$context = context
     this.$dataProxy = new DataProxy()
-    this.$queryBuilder = new QueryBuilder()
+  }
+  $inject(databaseProxy, tableMetadata) {
+    this.$databaseProxy = databaseProxy
+    this.$tableMetadata = tableMetadata
+    this.$queryBuilder = new QueryBuilder(this.$tableMetadata)
   }
   async findOne(identifier) {
     const conditionsObject = this.$getConditionsObjectFromArgument(identifier)
-    const query = this.$queryBuilder.getSelectQueryWithConditionsObject(this.$tableMetadata, conditionsObject)
+    const query = this.$queryBuilder.getSelectQueryWithConditionsObject(conditionsObject)
     const result = await this.$databaseProxy.query(query)
     if (result.length > 1) {
       throw new Error(`Multiple rows fetched from database in a findOne() query`)
