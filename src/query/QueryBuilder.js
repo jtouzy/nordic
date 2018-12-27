@@ -21,15 +21,25 @@ class QueryBuilder {
       return query
     }
   }
-  getFromClauseWithTableMetadata() {
-    return `${this.$tableMetadata.schema}.${this.$tableMetadata.name} AS ${this.$tableMetadata.name}`
+  getUpdateQuery(updatedValues, conditionsObject) {
+    const updateExpression = this.getConditionsWithObject(updatedValues, ',')
+    const conditions = this.getConditionsWithObject(conditionsObject, 'AND', updateExpression.values.length)
+    const hasConditions = conditions.values.length > 0
+    return {
+      text: `UPDATE ${this.getTableWithSchemaClause()} SET ${updateExpression.text} ${hasConditions ? `WHERE ${conditions.text}` : ''}`,
+      values: updateExpression.values.concat(conditions.values)
+    }
   }
-  getConditionsWithObject(conditionsObject) {
+  getFromClauseWithTableMetadata() {
+    return `${this.getTableWithSchemaClause()} AS ${this.$tableMetadata.name}`
+  }
+  getTableWithSchemaClause() {
+    return `${this.$tableMetadata.schema}.${this.$tableMetadata.name}`
+  }
+  getConditionsWithObject(conditionsObject, separator = 'AND', indexOffset = 0) {
     const conditionKeys = Object.keys(conditionsObject || {})
     return {
-      text: conditionKeys.reduce((sql, conditionKey, index) => {
-        return `${sql}${sql.length !== 0 ? ' AND ' : ''}${conditionKey} = $${index+1}`
-      }, ''),
+      text: conditionKeys.map((key, index) => `${key} = $${indexOffset+index+1}`).join(` ${separator} `),
       values: conditionKeys.map(key => conditionsObject[key])
     }
   }

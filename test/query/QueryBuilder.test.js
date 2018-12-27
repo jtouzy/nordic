@@ -36,6 +36,15 @@ describe('QueryBuilder.getSelectQueryWithConditionsObject', () => {
   })
 })
 
+describe('QueryBuilder.getUpdateQuery', () => {
+  it('Should generate basic SQL UPDATE query', () => {
+    const sut = new QueryBuilder({ name: 'articles', schema: 'secured' })
+    const update = sut.getUpdateQuery({ title: 'Toto' }, { article_id: 1 })
+    expect(update.text).to.be.equal('UPDATE secured.articles SET title = $1 WHERE article_id = $2')
+    expect(update.values).to.be.eql(['Toto', 1])
+  })
+})
+
 describe('QueryBuilder.getFromClauseWithTableMetadata', () => {
   it('Should generate FROM clause with alias', () => {
     const sut = new QueryBuilder({ name: 'articles', schema: 'secured' })
@@ -55,6 +64,18 @@ describe('QueryBuilder.getConditionsWithObject', () => {
     const sut = new QueryBuilder()
     const conditions = sut.getConditionsWithObject({ article_id: randomData.articleId, product_id: randomData.productId })
     expect(conditions.text).to.be.equal('article_id = $1 AND product_id = $2')
+    expect(conditions.values).to.be.eql([randomData.articleId, randomData.productId])
+  })
+  it('Should generate multiple conditions as text and array of values with given separator', () => {
+    const sut = new QueryBuilder()
+    const conditions = sut.getConditionsWithObject({ article_id: randomData.articleId, product_id: randomData.productId }, ',')
+    expect(conditions.text).to.be.equal('article_id = $1 , product_id = $2')
+    expect(conditions.values).to.be.eql([randomData.articleId, randomData.productId])
+  })
+  it('Should generate multiple conditions as text and array of values with given offset in indexes', () => {
+    const sut = new QueryBuilder()
+    const conditions = sut.getConditionsWithObject({ article_id: randomData.articleId, product_id: randomData.productId }, 'AND', 3)
+    expect(conditions.text).to.be.equal('article_id = $4 AND product_id = $5')
     expect(conditions.values).to.be.eql([randomData.articleId, randomData.productId])
   })
 })

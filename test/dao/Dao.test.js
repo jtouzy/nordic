@@ -34,6 +34,7 @@ const provideDaoWithTableWithNoPrimaryKeys = () => {
 }
 
 const provideDaoWithTableWithOnePrimaryKey = () => {
+  const mockedDatabaseProxy = new MockedDatabaseProxy()
   return new Dao({
     tableMetadata: {
       schema: 'secured',
@@ -42,7 +43,8 @@ const provideDaoWithTableWithOnePrimaryKey = () => {
         { name: 'article_id', required: true, primaryKey: true },
         { name: 'title', required: true, primaryKey: false }
       ]
-    }
+    },
+    databaseProxy: mockedDatabaseProxy
   })
 }
 
@@ -79,6 +81,13 @@ const provideDaoAndFindOneWithMockedDatabaseProxy = async (schema, table, query)
   const databaseProxy = dao.$databaseProxy
   const result = await dao.findOne(query)
   return { dao, result }
+}
+
+const provideDaoAndUpdateWithMockedDatabaseProxy = async (schema, table, object) => {
+  const dao = provideDaoWithTableWithOnePrimaryKey()
+  const databaseProxy = dao.$databaseProxy
+  await dao.update(object)
+  return dao
 }
 
 describe('Dao.constructor', () => {
@@ -120,6 +129,17 @@ describe('Dao.findOne', () => {
   it('Should return values as transformed objects', async () => {
     const { result } = await provideDaoAndFindOneWithMockedDatabaseProxy('secured', 'articles', { articleId: 1 })
     expect(result).to.be.eql({ articleId: 1, title: 'article1' })
+  })
+})
+
+describe('Dao.update', () => {
+  it('Should send SQL UPDATE to database proxy', async () => {
+    const dao = await provideDaoAndUpdateWithMockedDatabaseProxy('secured', 'articles', { title: 'Toto', articleId: 1 })
+    const databaseProxy = dao.$databaseProxy
+    expect(databaseProxy.$queries).to.be.eql([{
+      text: 'UPDATE secured.articles SET title = $1 WHERE article_id = $2',
+      values: ['Toto', 1]
+    }])
   })
 })
 

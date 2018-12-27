@@ -26,6 +26,20 @@ class Dao {
     }
     return result.length === 0 ? result : this.$dataProxy.databaseToObject(result[0])
   }
+  async update(object, conditions) {
+    const conditionsObject = this.$getUpdateConditionsObjectFromArguments(object, conditions)
+    const conditionKeys = Object.keys(conditionsObject)
+    const convertedObject = this.$dataProxy.objectToDatabase(object)
+    const updatedValues = Object.keys(convertedObject).reduce((accumulator, key) => {
+      if (conditionKeys.includes(key)) {
+        return accumulator
+      } else {
+        return Object.assign(accumulator, { [key]: convertedObject[key] })
+      }
+    }, {})
+    const query = this.$queryBuilder.getUpdateQuery(updatedValues, conditionsObject)
+    await this.$databaseProxy.query(query)
+  }
   $getUpdateConditionsObjectFromArguments(object, conditions) {
     if (!conditions) {
       const primaryKeys = this.$tableMetadata.columns.filter(c => c.primaryKey)
