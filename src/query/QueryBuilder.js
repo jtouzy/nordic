@@ -2,16 +2,23 @@ class QueryBuilder {
   constructor(tableMetadata) {
     this.$tableMetadata = tableMetadata
   }
+  getSelectQuery() {
+    return {
+      text: `SELECT * FROM ${this.getFromClauseWithTableMetadata()}`,
+      values: []
+    }
+  }
   getSelectQueryWithConditionsObject(conditionsObject) {
     const conditions = this.getConditionsWithObject(conditionsObject)
     const hasConditions = conditions.values.length > 0
-    return {
-      text: `
-        SELECT *
-          FROM ${this.getFromClauseWithTableMetadata()}
-          ${hasConditions ? `WHERE ${conditions.text}` : ''}
-      `,
-      values: conditions.values
+    const query = this.getSelectQuery()
+    if (hasConditions) {
+      return {
+        text: `${query.text} WHERE ${conditions.text}`,
+        values: query.values.concat(conditions.values)
+      }
+    } else {
+      return query
     }
   }
   getFromClauseWithTableMetadata() {

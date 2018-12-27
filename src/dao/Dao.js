@@ -14,6 +14,11 @@ class Dao {
     this.$tableMetadata = tableMetadata
     this.$queryBuilder = new QueryBuilder(this.$tableMetadata)
   }
+  async findAll() {
+    const query = this.$queryBuilder.getSelectQuery()
+    const result = await this.$databaseProxy.query(query)
+    return result.length === 0 ? result : this.$dataProxy.databaseToObject(result[0])
+  }
   async findOne(identifier) {
     const conditionsObject = this.$getConditionsObjectFromArgument(identifier)
     const query = this.$queryBuilder.getSelectQueryWithConditionsObject(conditionsObject)
