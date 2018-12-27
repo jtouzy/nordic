@@ -20,6 +20,45 @@ class MockedDatabaseProxy {
   }
 }
 
+const provideDaoWithTableWithNoPrimaryKeys = () => {
+  return new Dao({
+    tableMetadata: {
+      schema: 'secured',
+      name: 'articles',
+      columns: [
+        { name: 'article_id', required: true, primaryKey: false },
+        { name: 'title', required: true, primaryKey: false }
+      ]
+    }
+  })
+}
+
+const provideDaoWithTableWithOnePrimaryKey = () => {
+  return new Dao({
+    tableMetadata: {
+      schema: 'secured',
+      name: 'articles',
+      columns: [
+        { name: 'article_id', required: true, primaryKey: true },
+        { name: 'title', required: true, primaryKey: false }
+      ]
+    }
+  })
+}
+
+const provideDaoWithTableWithTwoPrimaryKeysWithOneRequired = () => {
+  return new Dao({
+    tableMetadata: {
+      schema: 'secured',
+      name: 'articles',
+      columns: [
+        { name: 'article_id', required: true, primaryKey: true },
+        { name: 'article_reference', required: false, primaryKey: true }
+      ]
+    }
+  })
+}
+
 const daoProviderWithMockedDatabaseProxy = (schema, table) => {
   const mockedDatabaseProxy = new MockedDatabaseProxy()
   return new Dao({
@@ -81,6 +120,54 @@ describe('Dao.findOne', () => {
   it('Should return values as transformed objects', async () => {
     const { result } = await provideDaoAndFindOneWithMockedDatabaseProxy('secured', 'articles', { articleId: 1 })
     expect(result).to.be.eql({ articleId: 1, title: 'article1' })
+  })
+})
+
+describe('Dao.$getUpdateConditionsObjectFromArguments', () => {
+  // TODO add string argument test when implemented
+  it('Should convert given object conditions for update', () => {
+    // Given
+    const dao = provideDaoWithTableWithOnePrimaryKey()
+    // When
+    const result = dao.$getUpdateConditionsObjectFromArguments({ articleId: 1, title: 'Todo' }, { articleReference: 1 })
+    // Expect
+    expect(result).to.be.eql({ article_reference: 1 })
+  })
+  it('Should convert given function conditions for update', () => {
+    // Given
+    const dao = provideDaoWithTableWithOnePrimaryKey()
+    // When
+    const result = dao.$getUpdateConditionsObjectFromArguments({ articleId: 1, title: 'Todo' }, () => { return { articleReference: 1 } })
+    // Expect
+    expect(result).to.be.eql({ article_reference: 1 })
+  })
+  it('Should convert primary keys as conditions for update if no conditions given', () => {
+    // Given
+    const dao = provideDaoWithTableWithOnePrimaryKey()
+    // When
+    const result = dao.$getUpdateConditionsObjectFromArguments({ articleId: 1, title: 'Todo' })
+    // Expect
+    expect(result).to.be.eql({ article_id: 1 })
+  })
+  it('Should convert primary keys as conditions for update if no conditions given, avoiding non-required primary keys', () => {
+    // Given
+    const dao = provideDaoWithTableWithTwoPrimaryKeysWithOneRequired()
+    // When
+    const result = dao.$getUpdateConditionsObjectFromArguments({ articleId: 1, title: 'Todo' })
+    // Expect
+    expect(result).to.be.eql({ article_id: 1 })
+  })
+  it('Should throw error if no conditions given and no primary keys given', () => {
+    // Given
+    const dao = provideDaoWithTableWithOnePrimaryKey()
+    // When/Expect
+    expect(() => { dao.$getUpdateConditionsObjectFromArguments({ title: 'Todo' }) }).to.throw(Error)
+  })
+  it('Should throw error if no conditions given and no primary keys in table', () => {
+    // Given
+    const dao = provideDaoWithTableWithNoPrimaryKeys()
+    // When/Expect
+    expect(() => { dao.$getUpdateConditionsObjectFromArguments({ title: 'Todo' }) }).to.throw(Error)
   })
 })
 
