@@ -15,7 +15,7 @@ class Dao {
   async findAll() {
     const query = this.$queryBuilder.getSelectQuery()
     const result = await this.$databaseProxy.query(query)
-    return result.length === 0 ? result : this.$dataProxy.databaseToObject(result[0])
+    return result.length === 0 ? result : this.$dataProxy.databaseToObject(result)
   }
   async findOne(identifier) {
     const conditionsObject = this.$getConditionsObjectFromArgument(identifier)
