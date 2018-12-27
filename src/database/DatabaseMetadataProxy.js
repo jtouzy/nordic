@@ -15,10 +15,18 @@ class DatabaseMetadataProxy {
   async findColumnsOfTables(tables) {
     return await this.$databaseProxy.query({
       text: `
-        SELECT table_schema, table_name, column_name, is_nullable, data_type
-          FROM information_schema.columns
-         WHERE table_schema = ANY($1)
-           AND table_name = ANY($2)
+        SELECT c.table_schema, c.table_name, c.column_name, c.is_nullable, c.data_type,
+               CASE WHEN pk.column_name IS NOT NULL THEN true ELSE false END AS is_primary
+          FROM information_schema.columns c LEFT JOIN (
+            SELECT ku.table_schema, ku.table_name, ku.column_name
+              FROM information_schema.table_constraints AS tc, information_schema.key_column_usage AS ku
+             WHERE tc.constraint_type = 'PRIMARY KEY'
+               AND tc.constraint_name = ku.constraint_name
+          ) pk ON c.table_schema = pk.table_schema
+              AND c.table_name = pk.table_name
+              AND c.column_name = pk.column_name
+         WHERE c.table_schema = ANY($1)
+           AND c.table_name = ANY($2)
       `,
       values: [tables.map(t => t.table_schema), tables.map(t => t.table_name)]
     })

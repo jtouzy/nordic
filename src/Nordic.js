@@ -44,6 +44,7 @@ class Nordic {
               return {
                 name: c.column_name,
                 required: c.is_nullable !== 'YES',
+                primaryKey: c.is_primary,
                 dataType: c.data_type
               }
             })
