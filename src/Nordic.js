@@ -1,37 +1,21 @@
 const Dao = require('./dao/Dao')
 const DatabaseMetadataProxy = require('./database/DatabaseMetadataProxy')
 const DatabaseProxy = require('./database/DatabaseProxy')
+const EntityContextFactory = require('./dao/EntityContextFactory')
 
 class Nordic {
   initialize({ host, port, database, user, password }) {
     this.$databaseProxy = new DatabaseProxy({ host, port, database, user, password })
   }
-  async getDao(daoClassOrTableName) {
-    let daoInstance
-    if (typeof daoClassOrTableName === 'function') {
-      daoInstance = new daoClassOrTableName()
+  async getDao(daoClassOrEntityProperties) {
+    const entityContext = EntityContextFactory.from(daoClassOrEntityProperties)
+    const tableMetadata = await this.getTableMetadata(entityContext)
+    const daoContext = { tableMetadata, databaseProxy: this.$databaseProxy }
+    if (daoClassOrTableName instanceof Function) {
+      return new daoClassOrEntityProperties(daoContext)
     } else {
-      let context = {}
-      if (typeof daoClassOrTableName === 'string') {
-        context = this.$getDaoContextFromString(daoClassOrTableName)
-      } else if (typeof daoClassOrTableName === 'object') {
-        let { schema, table } = daoClassOrTableName
-        context = this.$getDaoContextFromObject(schema, table)
-      } else {
-        throw new Error(`Can't create Dao instance`)
-      }
-      daoInstance = new Dao(context)
+      return new Dao(daoContext)
     }
-    // Inject
-    const tableMetadata = await this.getTableMetadata(daoInstance.$context)
-    daoInstance.$inject(this.$databaseProxy, tableMetadata)
-    return daoInstance
-  }
-  $getDaoContextFromString(table) {
-    return { schema: 'public', table }
-  }
-  $getDaoContextFromObject(schema, table) {
-    return { schema, table }
   }
   async getTableMetadata({ schema, table }) {
     const databaseMetadata = await this.getDatabaseMetadata()

@@ -6,12 +6,10 @@ class Dao {
     if (typeof context === 'undefined') {
       throw new Error('Missing context object in dao instance. Maybe you forgot to call super constructor with context ?')
     }
-    this.$context = context
-    this.$dataProxy = new DataProxy()
-  }
-  $inject(databaseProxy, tableMetadata) {
-    this.$databaseProxy = databaseProxy
+    const { tableMetadata, databaseProxy } = context
     this.$tableMetadata = tableMetadata
+    this.$databaseProxy = databaseProxy
+    this.$dataProxy = new DataProxy()
     this.$queryBuilder = new QueryBuilder(this.$tableMetadata)
   }
   async findAll() {
