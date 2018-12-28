@@ -1,16 +1,23 @@
 const Dao = require('./dao/Dao')
 const DatabaseMetadataProxy = require('./database/DatabaseMetadataProxy')
 const DatabaseProxy = require('./database/DatabaseProxy')
+const DataProxy = require('./data/DataProxy')
 const EntityContextFactory = require('./dao/EntityContextFactory')
 
 class Nordic {
-  initialize({ host, port, database, user, password }) {
+  initialize({ host, port, database, user, password, options }) {
     this.$databaseProxy = new DatabaseProxy({ host, port, database, user, password })
+    const transformOptions = (options || {}).transform
+    this.$dataProxy = new DataProxy(transformOptions)
   }
   async getDao(daoClassOrEntityProperties) {
     const entityContext = EntityContextFactory.from(daoClassOrEntityProperties)
     const tableMetadata = await this.getTableMetadata(entityContext)
-    const daoContext = { tableMetadata, databaseProxy: this.$databaseProxy }
+    const daoContext = {
+      tableMetadata,
+      databaseProxy: this.$databaseProxy,
+      dataProxy: this.$dataProxy
+    }
     if (daoClassOrTableName instanceof Function) {
       return new daoClassOrEntityProperties(daoContext)
     } else {

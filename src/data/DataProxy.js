@@ -1,16 +1,18 @@
-const toCamelCase = require('lodash.camelcase')
-const toSnakeCase = require('lodash.snakecase')
-
 class DataProxy {
-  constructor() {
+  constructor(transformOptions) {
+    this.$databaseToObjectKeyTransform = (transformOptions || {}).databaseToObjectKeyTransform
+    this.$objectToDatabaseKeyTransform = (transformOptions || {}).objectToDatabaseKeyTransform
   }
   databaseToObject(data) {
-    return this.$processData(data, toCamelCase)
+    return this.$processData(data, this.$databaseToObjectKeyTransform)
   }
   objectToDatabase(data) {
-    return this.$processData(data, toSnakeCase)
+    return this.$processData(data, this.$objectToDatabaseKeyTransform)
   }
   $processData(data, transformFn) {
+    if (!transformFn || !(transformFn instanceof Function)) {
+      return data
+    }
     if (Array.isArray(data)) {
       return data.map((d) => this.$transformDeeply(d, transformFn))
     } else {

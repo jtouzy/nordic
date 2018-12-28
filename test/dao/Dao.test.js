@@ -174,7 +174,7 @@ describe('Dao.$getConditionsObjectFromArgument', () => {
   // TODO add string argument test when implemented
   it('Should convert regular object to database readable object', () => {
     // Given
-    const dao = new Dao({})
+    const dao = DataSetProvider.getDao_withTableMetadata_withNoColumns()
     // When
     const result = dao.$getConditionsObjectFromArgument({ articleId: 'article113' })
     // Expect
@@ -182,7 +182,7 @@ describe('Dao.$getConditionsObjectFromArgument', () => {
   })
   it('Should not convert database readable object', () => {
     // Given
-    const dao = new Dao({})
+    const dao = DataSetProvider.getDao_withTableMetadata_withNoColumns()
     // When
     const result = dao.$getConditionsObjectFromArgument({ article_id: 'article113' })
     // Expect
@@ -190,7 +190,7 @@ describe('Dao.$getConditionsObjectFromArgument', () => {
   })
   it('Should convert function argument with regular object as database readable object', () => {
     // Given
-    const dao = new Dao({})
+    const dao = DataSetProvider.getDao_withTableMetadata_withNoColumns()
     // When
     const result = dao.$getConditionsObjectFromArgument(() => { return { articleId: 'article113' } })
     // Expect
@@ -198,7 +198,7 @@ describe('Dao.$getConditionsObjectFromArgument', () => {
   })
   it('Should convert function argument with database readable object', () => {
     // Given
-    const dao = new Dao({})
+    const dao = DataSetProvider.getDao_withTableMetadata_withNoColumns()
     // When
     const result = dao.$getConditionsObjectFromArgument(() => { return { article_id: 'article113' } })
     // Expect

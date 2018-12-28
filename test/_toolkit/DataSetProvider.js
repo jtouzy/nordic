@@ -1,5 +1,9 @@
 const MockedDatabaseProxy = require('./MockedDatabaseProxy')
 const Dao = require('../../src/dao/Dao')
+const DataProxy = require('../../src/data/DataProxy')
+
+const toCamelCase = require('lodash.camelcase')
+const toSnakeCase = require('lodash.snakecase')
 
 const securedSchema = 'secured'
 const articlesTable = 'articles'
@@ -41,35 +45,55 @@ class DataSetProvider {
     })
   }
   // ***************************************************************************
+  // DATA SET - DataProxy
+  // ***************************************************************************
+  static getDataProxy_withCamelToSnakeTransform() {
+    return new DataProxy({
+      objectToDatabaseKeyTransform: toSnakeCase,
+      databaseToObjectKeyTransform: toCamelCase
+    })
+  }
+  // ***************************************************************************
   // DATA SET - Dao
   // ***************************************************************************
+  static getDao_withTableMetadata_withNoColumns() {
+    return new Dao({
+      tableMetadata: this.getTableMetadata_withNoColumns(),
+      dataProxy: this.getDataProxy_withCamelToSnakeTransform()
+    })
+  }
   static getDao_withTableMetadata_withNoColumns_withMockedDatabaseProxy() {
     const mockedDatabaseProxy = new MockedDatabaseProxy()
     return new Dao({
       tableMetadata: this.getTableMetadata_withNoColumns(),
-      databaseProxy: mockedDatabaseProxy
+      databaseProxy: mockedDatabaseProxy,
+      dataProxy: this.getDataProxy_withCamelToSnakeTransform()
     })
   }
   static getDao_withTableMetadata_withColumns_withNoPrimaryKeys_requiredColumns() {
     return new Dao({
-      tableMetadata: this.getTableMetadata_withColumns_withNoPrimaryKeys_requiredColumns()
+      tableMetadata: this.getTableMetadata_withColumns_withNoPrimaryKeys_requiredColumns(),
+      dataProxy: this.getDataProxy_withCamelToSnakeTransform()
     })
   }
   static getDao_withTableMetadata_withColumns_withOnePrimaryKey_requiredColumns() {
     return new Dao({
-      tableMetadata: this.getTableMetadata_withColumns_withOnePrimaryKey_requiredColumns()
+      tableMetadata: this.getTableMetadata_withColumns_withOnePrimaryKey_requiredColumns(),
+      dataProxy: this.getDataProxy_withCamelToSnakeTransform()
     })
   }
   static getDao_withTableMetadata_withColumns_withOnePrimaryKey_requiredColumns_withMockedDatabaseProxy() {
     const mockedDatabaseProxy = new MockedDatabaseProxy()
     return new Dao({
       tableMetadata: this.getTableMetadata_withColumns_withOnePrimaryKey_requiredColumns(),
-      databaseProxy: mockedDatabaseProxy
+      databaseProxy: mockedDatabaseProxy,
+      dataProxy: this.getDataProxy_withCamelToSnakeTransform()
     })
   }
   static getDao_withTableMetadata_withColumns_withTwoPrimaryKeyAndOneRequired() {
     return new Dao({
-      tableMetadata: this.getTableMetadata_withColumns_withTwoPrimaryKeysAndOneRequired()
+      tableMetadata: this.getTableMetadata_withColumns_withTwoPrimaryKeysAndOneRequired(),
+      dataProxy: this.getDataProxy_withCamelToSnakeTransform()
     })
   }
 }
