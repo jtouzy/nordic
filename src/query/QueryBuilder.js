@@ -10,24 +10,25 @@ class QueryBuilder {
   }
   getSelectQueryWithConditionsObject(conditionsObject) {
     const conditions = this.getConditionsWithObject(conditionsObject)
-    const hasConditions = conditions.values.length > 0
-    const query = this.getSelectQuery()
-    if (hasConditions) {
-      return {
-        text: `${query.text} WHERE ${conditions.text}`,
-        values: query.values.concat(conditions.values)
-      }
-    } else {
-      return query
+    const { text, values } = this.getSelectQuery()
+    return {
+      text: this.$appendWhereConditionIfNeeded(text, conditions),
+      values: values.concat(conditions.values)
     }
   }
   getUpdateQuery(updatedValues, conditionsObject) {
     const updateExpression = this.getConditionsWithObject(updatedValues, ',')
     const conditions = this.getConditionsWithObject(conditionsObject, 'AND', updateExpression.values.length)
-    const hasConditions = conditions.values.length > 0
     return {
-      text: `UPDATE ${this.getTableWithSchemaClause()} SET ${updateExpression.text} ${hasConditions ? `WHERE ${conditions.text}` : ''}`,
+      text: this.$appendWhereConditionIfNeeded(`UPDATE ${this.getTableWithSchemaClause()} SET ${updateExpression.text}`, conditions),
       values: updateExpression.values.concat(conditions.values)
+    }
+  }
+  getDeleteQuery(conditionsObject) {
+    const conditions = this.getConditionsWithObject(conditionsObject)
+    return {
+      text: this.$appendWhereConditionIfNeeded(`DELETE FROM ${this.getTableWithSchemaClause()}`, conditions),
+      values: conditions.values
     }
   }
   getFromClauseWithTableMetadata() {
@@ -35,6 +36,10 @@ class QueryBuilder {
   }
   getTableWithSchemaClause() {
     return `${this.$tableMetadata.schema}.${this.$tableMetadata.name}`
+  }
+  $appendWhereConditionIfNeeded(query, conditions) {
+    const hasConditions = conditions && conditions.values && conditions.values.length > 0
+    return `${query}${hasConditions ? ` WHERE ${conditions.text}` : ''}`
   }
   getConditionsWithObject(conditionsObject, separator = 'AND', indexOffset = 0) {
     const conditionKeys = Object.keys(conditionsObject || {})

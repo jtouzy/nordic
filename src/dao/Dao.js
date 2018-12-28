@@ -40,30 +40,43 @@ class Dao {
     const query = this.$queryBuilder.getUpdateQuery(updatedValues, conditionsObject)
     await this.$databaseProxy.query(query)
   }
+  async deleteOne(object) {
+    const conditionsObject = this.$getPrimaryKeyConditionsFromObject(object)
+    const query = this.$queryBuilder.getDeleteQuery(conditionsObject)
+    await this.$databaseProxy.query(query)
+  }
+  async delete(conditions) {
+    const conditionsObject = this.$getConditionsObjectFromArgument(conditions)
+    const query = this.$queryBuilder.getDeleteQuery(conditionsObject)
+    await this.$databaseProxy.query(query)
+  }
   $getUpdateConditionsObjectFromArguments(object, conditions) {
     if (!conditions) {
-      const primaryKeys = this.$tableMetadata.columns.filter(c => c.primaryKey)
-      if (primaryKeys.length === 0) {
-        throw new Error(`No conditions has been given, and no primary keys is registered : can't do update`)
-      }
-      const convertedObject = this.$dataProxy.objectToDatabase(object)
-      const requiredPrimaryKeyNames = primaryKeys.filter(k => k.required).map(k => k.name)
-      const convertedObjectKeys = Object.keys(convertedObject)
-      const notIncludedInObjectKeys = requiredPrimaryKeyNames.filter(k => !convertedObjectKeys.includes(k))
-      if (notIncludedInObjectKeys.length > 0) {
-        throw new Error(`Some properties (${notIncludedInObjectKeys.join(',')}) are not included in updated object, but they are required for update`)
-      }
-      return primaryKeys.reduce((accumulator, key) => {
-        const submittedValue = convertedObject[key.name]
-        if (submittedValue) {
-          return Object.assign(accumulator, { [key.name]: submittedValue })
-        } else {
-          return accumulator
-        }
-      }, {})
+      return this.$getPrimaryKeyConditionsFromObject(object)
     } else {
       return this.$getConditionsObjectFromArgument(conditions)
     }
+  }
+  $getPrimaryKeyConditionsFromObject(object) {
+    const primaryKeys = this.$tableMetadata.columns.filter(c => c.primaryKey)
+    if (primaryKeys.length === 0) {
+      throw new Error(`No conditions has been given, and no primary keys is registered : can't do update`)
+    }
+    const convertedObject = this.$dataProxy.objectToDatabase(object)
+    const requiredPrimaryKeyNames = primaryKeys.filter(k => k.required).map(k => k.name)
+    const convertedObjectKeys = Object.keys(convertedObject)
+    const notIncludedInObjectKeys = requiredPrimaryKeyNames.filter(k => !convertedObjectKeys.includes(k))
+    if (notIncludedInObjectKeys.length > 0) {
+      throw new Error(`Some properties (${notIncludedInObjectKeys.join(',')}) are not included in updated object, but they are required for update`)
+    }
+    return primaryKeys.reduce((accumulator, key) => {
+      const submittedValue = convertedObject[key.name]
+      if (submittedValue) {
+        return Object.assign(accumulator, { [key.name]: submittedValue })
+      } else {
+        return accumulator
+      }
+    }, {})
   }
   $getConditionsObjectFromArgument(argument) {
     if (typeof argument === 'string') {

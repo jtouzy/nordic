@@ -90,6 +90,13 @@ const provideDaoAndUpdateWithMockedDatabaseProxy = async (schema, table, object)
   return dao
 }
 
+const provideDaoAndDeleteWithMockedDatabaseProxy = async (schema, table, object) => {
+  const dao = provideDaoWithTableWithOnePrimaryKey()
+  const databaseProxy = dao.$databaseProxy
+  await dao.delete(object)
+  return dao
+}
+
 describe('Dao.constructor', () => {
   it('Should be fine if context object is set', () => {
     expect(() => { new Dao({}) }).to.not.throw(Error)
@@ -138,6 +145,32 @@ describe('Dao.update', () => {
     const databaseProxy = dao.$databaseProxy
     expect(databaseProxy.$queries).to.be.eql([{
       text: 'UPDATE secured.articles SET title = $1 WHERE article_id = $2',
+      values: ['Toto', 1]
+    }])
+  })
+})
+
+describe('Dao.deleteOne', () => {
+  it('Should send SQL DELETE with primary keys to database proxy', async () => {
+    // Given
+    const dao = provideDaoWithTableWithOnePrimaryKey()
+    const databaseProxy = dao.$databaseProxy
+    // When
+    await dao.deleteOne({ title: 'Toto', articleId: 1 })
+    // Expect
+    expect(databaseProxy.$queries).to.be.eql([{
+      text: 'DELETE FROM secured.articles WHERE article_id = $1',
+      values: [1]
+    }])
+  })
+})
+
+describe('Dao.delete', () => {
+  it('Should send SQL DELETE to database proxy', async () => {
+    const dao = await provideDaoAndDeleteWithMockedDatabaseProxy('secured', 'articles', { title: 'Toto', articleId: 1 })
+    const databaseProxy = dao.$databaseProxy
+    expect(databaseProxy.$queries).to.be.eql([{
+      text: 'DELETE FROM secured.articles WHERE title = $1 AND article_id = $2',
       values: ['Toto', 1]
     }])
   })
