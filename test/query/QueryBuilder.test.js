@@ -43,6 +43,30 @@ describe('QueryBuilder.getInsertQuery', () => {
     expect(insert.text).to.be.equal('INSERT INTO secured.articles (title, reference) VALUES ($1, $2)')
     expect(insert.values).to.be.eql(['Toto', 1])
   })
+  it('Should generate SQL INSERT query with multiple inserted values (2)', () => {
+    const sut = new QueryBuilder({ name: 'articles', schema: 'secured' })
+    const insert = sut.getInsertQuery([{ title: 'Toto', reference: 1 }, { title: 'Titi', reference: 2 }])
+    expect(insert.text).to.be.equal('INSERT INTO secured.articles (title, reference) VALUES ($1, $2), ($3, $4)')
+    expect(insert.values).to.be.eql(['Toto', 1, 'Titi', 2])
+  })
+  it('Should generate SQL INSERT query with multiple inserted values (3)', () => {
+    const sut = new QueryBuilder({ name: 'articles', schema: 'secured' })
+    const insert = sut.getInsertQuery([{ title: 'Toto', reference: 1 }, { title: 'Titi', reference: 2 }, { title: 'Tata', reference: 3 }])
+    expect(insert.text).to.be.equal('INSERT INTO secured.articles (title, reference) VALUES ($1, $2), ($3, $4), ($5, $6)')
+    expect(insert.values).to.be.eql(['Toto', 1, 'Titi', 2, 'Tata', 3])
+  })
+  it('Should generate SQL INSERT query with multiple inserted values, but different columns', () => {
+    const sut = new QueryBuilder({ name: 'articles', schema: 'secured' })
+    const insert = sut.getInsertQuery([{ title: 'Toto', reference: 1 }, { title: 'Titi', optional: 3 }])
+    expect(insert.text).to.be.equal('INSERT INTO secured.articles (title, reference, optional) VALUES ($1, $2, $3), ($4, $5, $6)')
+    expect(insert.values).to.be.eql(['Toto', 1, null, 'Titi', null, 3])
+  })
+  it('Should generate SQL INSERT query with multiple inserted values, but different columns and different count', () => {
+    const sut = new QueryBuilder({ name: 'articles', schema: 'secured' })
+    const insert = sut.getInsertQuery([{ title: 'Toto', reference: 1 }, { title: 'Titi', reference: 2, optional: 3 }])
+    expect(insert.text).to.be.equal('INSERT INTO secured.articles (title, reference, optional) VALUES ($1, $2, $3), ($4, $5, $6)')
+    expect(insert.values).to.be.eql(['Toto', 1, null, 'Titi', 2, 3])
+  })
 })
 
 describe('QueryBuilder.getUpdateQuery', () => {

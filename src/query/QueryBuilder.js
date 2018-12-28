@@ -17,16 +17,19 @@ class QueryBuilder {
     }
   }
   getInsertQuery(createdValues) {
-    const createdValuesKeys = Object.keys(createdValues)
-    const replacementValues = createdValuesKeys.reduce((accumulator, key, index) => {
-      return Object.assign(accumulator, {
-        text: (accumulator.text || []).concat([`$${index+1}`]),
-        values: (accumulator.values || []).concat([createdValues[key]])
-      })
-    }, {})
+    const createdItems = Array.isArray(createdValues) ? createdValues : [createdValues]
+    if (createdItems.length === 0) {
+      throw new Error(`Trying to insert an empty array.`)
+    }
+    const allKeys = [... new Set(createdItems.reduce((accumulator, item) => {
+      return accumulator.concat(Object.keys(item))
+    }, []))]
+    const valuesQuery = createdItems.map((newItem, index) => `(${allKeys.map((k, idx) => `$${ idx + 1 + (allKeys.length*index) }`).join(', ')})`).join(', ')
     return {
-      text: `INSERT INTO ${this.getTableWithSchemaClause()} (${createdValuesKeys.join(', ')}) VALUES (${replacementValues.text.join(', ')})`,
-      values: replacementValues.values
+      text: `INSERT INTO ${this.getTableWithSchemaClause()} (${allKeys.join(', ')}) VALUES ${valuesQuery}`,
+      values: createdItems.reduce((accumulator, newItem) => {
+        return accumulator.concat(allKeys.map(k => newItem[k] ? newItem[k] : null))
+      }, [])
     }
   }
   getUpdateQuery(updatedValues, conditionsObject) {
