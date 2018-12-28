@@ -61,24 +61,34 @@ On your dao instances, you have multiples functions available (ES6 syntax in exa
 *Note that the first function you will call is gonna start the database connection, if you have [configured your database metadata manually](#database-metadata). If not, a connection is made on when the dao is created to fetch database metadata.*
 
 ```javascript
-// Find all items in given table
+// 1 / Find all items in given table
+// >> SELECT * FROM articles
 const allItems = await articlesDao.findAll()
 
-// Find one item in given table (with properties)
+// 2.1 / Find one item in given table (with properties)
+// >> SELECT * FROM articles WHERE article_id = 1
 const item = await articlesDao.findOne({ articleId: 1 })
-// Find one item in given table (with primary key implicit => only working with single primary key)
+// 2.2 / Find one item in given table (with primary key implicit => only working with single primary key)
+// >> SELECT * FROM articles WHERE article_id = 1
 const item = await articlesDao.findOne(1)
 
-// Create item
+// 3.1 / Create single item
+// >> INSERT INTO articles (article_id, title) VALUES (1, 'My title')
 const myItem = { articleId: 1, title: 'My title' }
 await articlesDao.create(myItem)
+// 3.2 / Create multiple items
+// >> INSERT INTO articles (article_id, title) VALUES (1, 'My title'), (2, 'My second title')
+const myItems = [ { articleId: 1, title: 'My title' }, { articleId: 2, title: 'My second title' } ]
+await articlesDao.create(myItems)
 
-// Update item
+// 4 / Update item
+// >> UPDATE articles SET title = 'My new title' WHERE article_id = 1
 const myItem = await articlesDao.findOne({ articleId: 1 })
 myItem.title = 'My new title'
 await articlesDao.update(myItem)
 
-// Delete item
+// 5 / Delete item
+// >> DELETE FROM articles WHERE article_id = 1
 const myItem = await articlesDao.findOne({ articleId: 1 })
 await articlesDao.deleteOne(myItem)
 ```
