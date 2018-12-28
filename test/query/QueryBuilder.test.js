@@ -36,6 +36,15 @@ describe('QueryBuilder.getSelectQueryWithConditionsObject', () => {
   })
 })
 
+describe('QueryBuilder.getInsertQuery', () => {
+  it('Should generate basic SQL INSERT query', () => {
+    const sut = new QueryBuilder({ name: 'articles', schema: 'secured' })
+    const insert = sut.getInsertQuery({ title: 'Toto', reference: 1 })
+    expect(insert.text).to.be.equal('INSERT INTO secured.articles (title, reference) VALUES ($1, $2)')
+    expect(insert.values).to.be.eql(['Toto', 1])
+  })
+})
+
 describe('QueryBuilder.getUpdateQuery', () => {
   it('Should generate basic SQL UPDATE query', () => {
     const sut = new QueryBuilder({ name: 'articles', schema: 'secured' })

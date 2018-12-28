@@ -16,6 +16,19 @@ class QueryBuilder {
       values: values.concat(conditions.values)
     }
   }
+  getInsertQuery(createdValues) {
+    const createdValuesKeys = Object.keys(createdValues)
+    const replacementValues = createdValuesKeys.reduce((accumulator, key, index) => {
+      return Object.assign(accumulator, {
+        text: (accumulator.text || []).concat([`$${index+1}`]),
+        values: (accumulator.values || []).concat([createdValues[key]])
+      })
+    }, {})
+    return {
+      text: `INSERT INTO ${this.getTableWithSchemaClause()} (${createdValuesKeys.join(', ')}) VALUES (${replacementValues.text.join(', ')})`,
+      values: replacementValues.values
+    }
+  }
   getUpdateQuery(updatedValues, conditionsObject) {
     const updateExpression = this.getConditionsWithObject(updatedValues, ',')
     const conditions = this.getConditionsWithObject(conditionsObject, 'AND', updateExpression.values.length)

@@ -62,6 +62,21 @@ describe('Dao.findOne', () => {
   })
 })
 
+describe('Dao.create', () => {
+  it('Should send SQL INSERT to database proxy', async () => {
+    // Given
+    const dao = DataSetProvider.getDao_withTableMetadata_withColumns_withOnePrimaryKey_requiredColumns_withMockedDatabaseProxy()
+    const databaseProxy = dao.$databaseProxy
+    // When
+    await dao.create({ title: 'Toto', articleId: 1 })
+    // Expect
+    expect(databaseProxy.$queries).to.be.eql([{
+      text: 'INSERT INTO secured.articles (title, article_id) VALUES ($1, $2)',
+      values: ['Toto', 1]
+    }])
+  })
+})
+
 describe('Dao.update', () => {
   it('Should send SQL UPDATE to database proxy', async () => {
     // Given

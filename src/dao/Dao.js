@@ -26,6 +26,11 @@ class Dao {
     }
     return result.length === 0 ? result : this.$dataProxy.databaseToObject(result[0])
   }
+  async create(object) {
+    const convertedObject = this.$dataProxy.objectToDatabase(object)
+    const query = this.$queryBuilder.getInsertQuery(convertedObject)
+    await this.$databaseProxy.query(query)
+  }
   async update(object, conditions) {
     const conditionsObject = this.$getUpdateConditionsObjectFromArguments(object, conditions)
     const conditionKeys = Object.keys(conditionsObject)
