@@ -11,17 +11,17 @@ Install nordic package with npm.
 npm install nordic --save
 ```
 
-## Basic usage
+## Basic start
 
 Simply get the nordic instance.
 
 ```javascript
-const nordic = require('nordic')
+const { nordic } = require('nordic')
 ```
 
 Then, configure the nordic instance with the `initialize` function.
 
-**Note that this line will only configure the client access to your db. No connection is made at this point.**
+*Note that this line will only configure the client access to your db. No connection is made at this point.*
 
 ```javascript 
 nordic.initialize({
@@ -33,21 +33,32 @@ nordic.initialize({
 })
 ```
 
-Then, you have access to Dao objects, based on your schemas/tables.
-```javascript
-// with table name (public schema by default)
-const articlesDao = nordic.getDao('articles')
+## Dao instances
 
-// with schema & table name
-const articlesDao = nordic.getDao({ schema: 'secured', table: 'articles' })
+### Get a dao instance
+
+After base configuration, you have access to Dao objects, based on your schemas/tables.
+
+*Note that the first dao you will get is gonna start the database connection, if you haven't [configured your database metadata manually](#database-metadata).*
+
+```javascript
+// with string configuration (public schema by default)
+const articlesDao = await nordic.getDao('articles')
+
+// with object configuration
+const articlesDao = await nordic.getDao({ schema: 'secured', table: 'articles' })
 
 // with custom class
-const articlesDao = nordic.getDao(ArticlesDao)
+const articlesDao = await nordic.getDao(ArticlesDao)
 ```
 
-Then, on your dao instances, you have multiples functions available (ES6 syntax in example below).
+You can see below how to create [your own dao instances](#writing-your-own-dao-classes).
 
-**Note that the first query you will made is gonna start the database connection.**
+### Functions on dao instance
+
+On your dao instances, you have multiples functions available (ES6 syntax in example below).
+
+*Note that the first function you will call is gonna start the database connection, if you have [configured your database metadata manually](#database-metadata). If not, a connection is made on when the dao is created to fetch database metadata.*
 
 ```javascript
 // Find all items in given table
@@ -74,6 +85,8 @@ await articlesDao.deleteOne(myItem)
 
 ## Customization
 
+### Options configuration
+
 In addition to the database connection informations, you can send an `options` property to customize nordic configuration.
 
 ```javascript
@@ -85,7 +98,7 @@ nordic.initialize({
 
 Below, you can see all the available configuration options.
 
-### Database objects vs. model objects keys
+#### Database objects vs. model objects keys
 
 By default, no transformations are made to the objects fetched-from or stored-to database. You can configure two functions in the `options` property to transform keys during fetching or storing phases. 
 
@@ -97,5 +110,37 @@ By default, no transformations are made to the objects fetched-from or stored-to
   databaseToObjectKeyTransform: () => {},
   // Your object keys will be translated with this function when sending objects to database.
   objectToDatabaseKeyTransform: () => {}
+}
+```
+
+#### Database metadata
+
+To work well with primary keys or column definitions, Nordic needs to know more about your database metadata. When you're getting your first Dao object, Nordic will fetch this data from database.
+
+Of course, for performance purpose (and for serverless/microservices target), it's recommanded to give those metadata to your Nordic instance on the initialization phase like below.
+
+<< TODO >>
+
+### Writing your own dao classes
+
+You can customize your dao instances with your additional functions by overriding Dao class. You must provide an entity() static function to allow Nordic to retrieve the linked table.
+
+```javascript
+const { Dao } = require('nordic')
+
+// Custom ProductDao (with string configuration, public schema by default)
+class ProductDao extends Dao {
+  static entity() {
+    return 'products'
+  }
+  // Add your own functions here...
+}
+
+// Custom ProductDao (with object configuration)
+class ProductDao extends Dao {
+  static entity() {
+    return { schema: 'secured', table: 'products' }
+  }
+  // Add your own functions here...
 }
 ```
