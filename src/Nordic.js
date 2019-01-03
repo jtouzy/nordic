@@ -8,6 +8,9 @@ class Nordic {
   initialize({ host, port, database, user, password, options }) {
     this.$databaseProxy = new DatabaseProxy({ host, port, database, user, password })
     const transformOptions = (options || {}).transform
+    this.$initializeDataProxy(transformOptions)
+  }
+  $initializeDataProxy(transformOptions) {
     this.$dataProxy = new DataProxy(transformOptions)
   }
   async getDao(daoClassOrEntityProperties) {
@@ -23,6 +26,15 @@ class Nordic {
     } else {
       return new Dao(daoContext)
     }
+  }
+  async rawQuery(text, values) {
+    const valuesKeys = values ? Object.keys(values) : []
+    return await this.$databaseProxy.query({
+      text: valuesKeys.reduce((accumulator, key, index) => {
+        return accumulator.split(`:${key}`).join(`$${index+1}`)
+      }, text),
+      values: valuesKeys.map(k => values[k])
+    })
   }
   async getTableMetadata({ schema, table }) {
     const databaseMetadata = await this.getDatabaseMetadata()
