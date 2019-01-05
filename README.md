@@ -23,7 +23,7 @@ Then, configure the nordic instance with the `initialize` function.
 
 *Note that this line will only configure the client access to your db. No connection is made at this point.*
 
-```javascript 
+```javascript
 nordic.initialize({
   host: 'pg.mysuperhostname.myamazingcompany.mypowerfulamazonrdsserver.com',
   port: 5432,
@@ -86,11 +86,15 @@ await articlesDao.create(myItems)
 const myItem = await articlesDao.findOne({ articleId: 1 })
 myItem.title = 'My new title'
 await articlesDao.update(myItem)
+// >> UPDATE articles SET title = 'My new title' WHERE title = 'My old title'
+await articlesDao.updateWithConditions(myItem, { title: 'My old title' })
 
 // 5 / Delete item
 // >> DELETE FROM articles WHERE article_id = 1
 const myItem = await articlesDao.findOne({ articleId: 1 })
-await articlesDao.deleteOne(myItem)
+await articlesDao.delete(myItem)
+// >> DELETE FROM articles WHERE title = 'My title'
+await articlesDao.deleteWithConditions({ title: 'My title' })
 ```
 
 ## Customization
@@ -110,7 +114,7 @@ Below, you can see all the available configuration options.
 
 #### Database objects vs. model objects keys
 
-By default, no transformations are made to the objects fetched-from or stored-to database. You can configure two functions in the `options` property to transform keys during fetching or storing phases. 
+By default, no transformations are made to the objects fetched-from or stored-to database. You can configure two functions in the `options` property to transform keys during fetching or storing phases.
 
 *Note: To reduce dependencies, no methods is provided by default. But you can find examples of using lodash `toCamelCase` and `toSnakeCase` functions in [unit tests](https://github.com/jtouzy/nordic/blob/master/test/data/DataProxy.test.js))*
 

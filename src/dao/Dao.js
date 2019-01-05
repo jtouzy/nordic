@@ -32,36 +32,39 @@ class Dao {
     const query = this.$queryBuilder.getInsertQuery(convertedObjectOrArray)
     await this.$databaseProxy.query(query)
   }
-  async update(object, conditions) {
-    const conditionsObject = this.$getUpdateConditionsObjectFromArguments(object, conditions)
+  async update(object) {
+    const conditionsObject = this.$getPrimaryKeyConditionsFromObject(object)
+    const updatedValues = this.$getUpdatedValuesFrom(object, conditionsObject, { excludeConditions: true })
+    const query = this.$queryBuilder.getUpdateQuery(updatedValues, conditionsObject)
+    await this.$databaseProxy.query(query)
+  }
+  async updateWithConditions(object, conditions) {
+    const conditionsObject = this.$getConditionsObjectFromArgument(conditions)
+    const updatedValues = this.$getUpdatedValuesFrom(object, conditionsObject)
+    const query = this.$queryBuilder.getUpdateQuery(updatedValues, conditionsObject)
+    await this.$databaseProxy.query(query)
+  }
+  async delete(object) {
+    const conditionsObject = this.$getPrimaryKeyConditionsFromObject(object)
+    const query = this.$queryBuilder.getDeleteQuery(conditionsObject)
+    await this.$databaseProxy.query(query)
+  }
+  async deleteWithConditions(conditions) {
+    const conditionsObject = this.$getConditionsObjectFromArgument(conditions)
+    const query = this.$queryBuilder.getDeleteQuery(conditionsObject)
+    await this.$databaseProxy.query(query)
+  }
+  $getUpdatedValuesFrom(object, conditionsObject, options = { excludeConditions: false }) {
+    const { excludeConditions } = options
     const conditionKeys = Object.keys(conditionsObject)
     const convertedObject = this.$dataProxy.objectToDatabase(object)
-    const updatedValues = Object.keys(convertedObject).reduce((accumulator, key) => {
-      if (conditionKeys.includes(key)) {
+    return Object.keys(convertedObject).reduce((accumulator, key) => {
+      if (excludeConditions && conditionKeys.includes(key)) {
         return accumulator
       } else {
         return Object.assign(accumulator, { [key]: convertedObject[key] })
       }
     }, {})
-    const query = this.$queryBuilder.getUpdateQuery(updatedValues, conditionsObject)
-    await this.$databaseProxy.query(query)
-  }
-  async deleteOne(object) {
-    const conditionsObject = this.$getPrimaryKeyConditionsFromObject(object)
-    const query = this.$queryBuilder.getDeleteQuery(conditionsObject)
-    await this.$databaseProxy.query(query)
-  }
-  async delete(conditions) {
-    const conditionsObject = this.$getConditionsObjectFromArgument(conditions)
-    const query = this.$queryBuilder.getDeleteQuery(conditionsObject)
-    await this.$databaseProxy.query(query)
-  }
-  $getUpdateConditionsObjectFromArguments(object, conditions) {
-    if (!conditions) {
-      return this.$getPrimaryKeyConditionsFromObject(object)
-    } else {
-      return this.$getConditionsObjectFromArgument(conditions)
-    }
   }
   $getPrimaryKeyConditionsFromObject(object) {
     const primaryKeys = this.$tableMetadata.columns.filter(c => c.primaryKey)

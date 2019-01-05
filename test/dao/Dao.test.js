@@ -78,7 +78,7 @@ describe('Dao.create', () => {
 })
 
 describe('Dao.update', () => {
-  it('Should send SQL UPDATE to database proxy', async () => {
+  it('Should send SQL UPDATE with primary keys to database proxy', async () => {
     // Given
     const dao = DataSetProvider.getDao_withTableMetadata_withColumns_withOnePrimaryKey_requiredColumns_withMockedDatabaseProxy()
     const databaseProxy = dao.$databaseProxy
@@ -92,13 +92,28 @@ describe('Dao.update', () => {
   })
 })
 
-describe('Dao.deleteOne', () => {
+describe('Dao.updateWithConditions', () => {
+  it('Should send SQL UPDATE to database proxy', async () => {
+    // Given
+    const dao = DataSetProvider.getDao_withTableMetadata_withColumns_withOnePrimaryKey_requiredColumns_withMockedDatabaseProxy()
+    const databaseProxy = dao.$databaseProxy
+    // When
+    await dao.updateWithConditions({ title: 'Toto' }, { title: 'Titi' })
+    // Expect
+    expect(databaseProxy.$queries).to.be.eql([{
+      text: 'UPDATE secured.articles SET title = $1 WHERE title = $2',
+      values: ['Toto', 'Titi']
+    }])
+  })
+})
+
+describe('Dao.delete', () => {
   it('Should send SQL DELETE with primary keys to database proxy', async () => {
     // Given
     const dao = DataSetProvider.getDao_withTableMetadata_withColumns_withOnePrimaryKey_requiredColumns_withMockedDatabaseProxy()
     const databaseProxy = dao.$databaseProxy
     // When
-    await dao.deleteOne({ title: 'Toto', articleId: 1 })
+    await dao.delete({ title: 'Toto', articleId: 1 })
     // Expect
     expect(databaseProxy.$queries).to.be.eql([{
       text: 'DELETE FROM secured.articles WHERE article_id = $1',
@@ -107,13 +122,13 @@ describe('Dao.deleteOne', () => {
   })
 })
 
-describe('Dao.delete', () => {
+describe('Dao.deleteWithConditions', () => {
   it('Should send SQL DELETE to database proxy', async () => {
     // Given
     const dao = DataSetProvider.getDao_withTableMetadata_withColumns_withOnePrimaryKey_requiredColumns_withMockedDatabaseProxy()
     const databaseProxy = dao.$databaseProxy
     // When
-    await dao.delete({ title: 'Toto', articleId: 1 })
+    await dao.deleteWithConditions({ title: 'Toto', articleId: 1 })
     // Expect
     expect(databaseProxy.$queries).to.be.eql([{
       text: 'DELETE FROM secured.articles WHERE title = $1 AND article_id = $2',
@@ -122,29 +137,12 @@ describe('Dao.delete', () => {
   })
 })
 
-describe('Dao.$getUpdateConditionsObjectFromArguments', () => {
-  // TODO add string argument test when implemented
-  it('Should convert given object conditions for update', () => {
-    // Given
-    const dao = DataSetProvider.getDao_withTableMetadata_withColumns_withOnePrimaryKey_requiredColumns()
-    // When
-    const result = dao.$getUpdateConditionsObjectFromArguments({ articleId: 1, title: 'Todo' }, { articleReference: 1 })
-    // Expect
-    expect(result).to.be.eql({ article_reference: 1 })
-  })
-  it('Should convert given function conditions for update', () => {
-    // Given
-    const dao = DataSetProvider.getDao_withTableMetadata_withColumns_withOnePrimaryKey_requiredColumns()
-    // When
-    const result = dao.$getUpdateConditionsObjectFromArguments({ articleId: 1, title: 'Todo' }, () => { return { articleReference: 1 } })
-    // Expect
-    expect(result).to.be.eql({ article_reference: 1 })
-  })
+describe('Dao.$getPrimaryKeyConditionsFromObject', () => {
   it('Should convert primary keys as conditions for update if no conditions given', () => {
     // Given
     const dao = DataSetProvider.getDao_withTableMetadata_withColumns_withOnePrimaryKey_requiredColumns()
     // When
-    const result = dao.$getUpdateConditionsObjectFromArguments({ articleId: 1, title: 'Todo' })
+    const result = dao.$getPrimaryKeyConditionsFromObject({ articleId: 1, title: 'Todo' })
     // Expect
     expect(result).to.be.eql({ article_id: 1 })
   })
@@ -152,7 +150,7 @@ describe('Dao.$getUpdateConditionsObjectFromArguments', () => {
     // Given
     const dao = DataSetProvider.getDao_withTableMetadata_withColumns_withTwoPrimaryKeyAndOneRequired()
     // When
-    const result = dao.$getUpdateConditionsObjectFromArguments({ articleId: 1, nonExistingColumn: 'Todo' })
+    const result = dao.$getPrimaryKeyConditionsFromObject({ articleId: 1, nonExistingColumn: 'Todo' })
     // Expect
     expect(result).to.be.eql({ article_id: 1 })
   })
@@ -160,13 +158,13 @@ describe('Dao.$getUpdateConditionsObjectFromArguments', () => {
     // Given
     const dao = DataSetProvider.getDao_withTableMetadata_withColumns_withOnePrimaryKey_requiredColumns()
     // When/Expect
-    expect(() => { dao.$getUpdateConditionsObjectFromArguments({ title: 'Todo' }) }).to.throw(Error)
+    expect(() => { dao.$getPrimaryKeyConditionsFromObject({ title: 'Todo' }) }).to.throw(Error)
   })
   it('Should throw error if no conditions given and no primary keys in table', () => {
     // Given
     const dao = DataSetProvider.getDao_withTableMetadata_withColumns_withNoPrimaryKeys_requiredColumns()
     // When/Expect
-    expect(() => { dao.$getUpdateConditionsObjectFromArguments({ title: 'Todo' }) }).to.throw(Error)
+    expect(() => { dao.$getPrimaryKeyConditionsFromObject({ title: 'Todo' }) }).to.throw(Error)
   })
 })
 
