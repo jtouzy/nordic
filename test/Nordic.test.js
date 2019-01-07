@@ -1,6 +1,20 @@
 const { expect } = require('chai')
+const fs = require('fs')
+const path = require('path')
 const Nordic = require('../src/Nordic')
 const MockedDatabaseProxy = require('./_toolkit/MockedDatabaseProxy')
+
+describe('Nordic.$initializeDatabaseMetadata', () => {
+  it('Should read metadata file and store it', () => {
+    // Given
+    const metadataPath = path.resolve(__dirname, '_toolkit', 'test-metadata.json')
+    const fileContent = fs.readFileSync(metadataPath, 'utf8')
+    // When
+    Nordic.$initializeDatabaseMetadata(metadataPath)
+    // Expect
+    expect(Nordic.$databaseMetadata).to.be.equal(fileContent)
+  })
+})
 
 describe('Nordic.rawQuery', () => {
   it('Should call database proxy with given query, with no parameters', async () => {

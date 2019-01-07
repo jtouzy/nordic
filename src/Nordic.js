@@ -1,3 +1,4 @@
+const fs = require('fs')
 const Dao = require('./dao/Dao')
 const DatabaseMetadataProxy = require('./database/DatabaseMetadataProxy')
 const DatabaseProxy = require('./database/DatabaseProxy')
@@ -7,11 +8,17 @@ const EntityContextFactory = require('./dao/EntityContextFactory')
 class Nordic {
   initialize({ host, port, database, user, password, options }) {
     this.$databaseProxy = new DatabaseProxy({ host, port, database, user, password })
-    const transformOptions = (options || {}).transform
-    this.$initializeDataProxy(transformOptions)
+    const { transform, metadataPath } = (options || {})
+    this.$initializeDataProxy(transform)
+    this.$initializeDatabaseMetadata(metadataPath)
   }
   $initializeDataProxy(transformOptions) {
     this.$dataProxy = new DataProxy(transformOptions)
+  }
+  $initializeDatabaseMetadata(metadataPath) {
+    if (metadataPath) {
+      this.$databaseMetadata = fs.readFileSync(metadataPath, 'utf8')
+    }
   }
   async getDao(daoClassOrEntityProperties) {
     const entityContext = EntityContextFactory.from(daoClassOrEntityProperties)

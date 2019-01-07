@@ -1,0 +1,22 @@
+{
+  "public": [
+    {
+      "name": "articles",
+      "schema": "public",
+      "columns": [
+        {
+          "name": "article_id",
+          "required": true,
+          "primaryKey": true,
+          "dataType": "uuid"
+        },
+        {
+          "name": "title",
+          "required": true,
+          "primaryKey": false,
+          "dataType": "text"
+        }
+      ]
+    }
+  ]
+}
