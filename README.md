@@ -148,10 +148,12 @@ By default, no transformations are made to the objects fetched-from or stored-to
 
 ```javascript
 {
-  // Your object keys will be translated with this function when fetching objects from database.
-  databaseToObjectKeyTransform: () => {},
-  // Your object keys will be translated with this function when sending objects to database.
-  objectToDatabaseKeyTransform: () => {}
+  transform: {
+    // Your object keys will be translated with this function when fetching objects from database.
+    databaseToObjectKeyTransform: () => {},
+    // Your object keys will be translated with this function when sending objects to database.
+    objectToDatabaseKeyTransform: () => {}
+  }
 }
 ```
 

@@ -28,7 +28,7 @@ class Nordic {
       databaseProxy: this.$databaseProxy,
       dataProxy: this.$dataProxy
     }
-    if (daoClassOrTableName instanceof Function) {
+    if (daoClassOrEntityProperties instanceof Function) {
       return new daoClassOrEntityProperties(daoContext)
     } else {
       return new Dao(daoContext)
