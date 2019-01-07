@@ -8,9 +8,23 @@ class QueryBuilder {
       values: []
     }
   }
+  getSelectCountQuery() {
+    return {
+      text: `SELECT COUNT(*) as count FROM ${this.getFromClauseWithTableMetadata()}`,
+      values: []
+    }
+  }
   getSelectQueryWithConditionsObject(conditionsObject) {
     const conditions = this.getConditionsWithObject(conditionsObject)
     const { text, values } = this.getSelectQuery()
+    return {
+      text: this.$appendWhereConditionIfNeeded(text, conditions),
+      values: values.concat(conditions.values)
+    }
+  }
+  getSelectCountQueryWithConditionsObject(conditionsObject) {
+    const conditions = this.getConditionsWithObject(conditionsObject)
+    const { text, values } = this.getSelectCountQuery()
     return {
       text: this.$appendWhereConditionIfNeeded(text, conditions),
       values: values.concat(conditions.values)

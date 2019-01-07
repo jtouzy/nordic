@@ -65,23 +65,31 @@ On your dao instances, you have multiples functions available (ES6 syntax in exa
 // >> SELECT * FROM articles
 const allItems = await articlesDao.findAll()
 
-// 2.1 / Find one item in given table (with properties)
+// 2 / Find items in given table (with properties)
 // >> SELECT * FROM articles WHERE article_id = 1
+const items = await articlesDao.find({ articleId: 1 })
+
+// 3.1 / Find one item in given table (with properties)
+// >> SELECT * FROM articles WHERE article_id = 1 (only first row)
 const item = await articlesDao.findOne({ articleId: 1 })
-// 2.2 / Find one item in given table (with primary key implicit => only working with single primary key)
-// >> SELECT * FROM articles WHERE article_id = 1
+// 3.2 / Find one item in given table (with primary key implicit => only working with single primary key)
+// >> SELECT * FROM articles WHERE article_id = 1 (only first row)
 const item = await articlesDao.findOne(1)
 
-// 3.1 / Create single item
+// 4 / Aggregates
+// >> SELECT COUNT(*) FROM articles
+const count = await articlesDao.count()
+
+// 5.1 / Create single item
 // >> INSERT INTO articles (article_id, title) VALUES (1, 'My title')
 const myItem = { articleId: 1, title: 'My title' }
 await articlesDao.create(myItem)
-// 3.2 / Create multiple items
+// 5.2 / Create multiple items
 // >> INSERT INTO articles (article_id, title) VALUES (1, 'My title'), (2, 'My second title')
 const myItems = [ { articleId: 1, title: 'My title' }, { articleId: 2, title: 'My second title' } ]
 await articlesDao.create(myItems)
 
-// 4 / Update item
+// 6 / Update item
 // >> UPDATE articles SET title = 'My new title' WHERE article_id = 1
 const myItem = await articlesDao.findOne({ articleId: 1 })
 myItem.title = 'My new title'
@@ -89,7 +97,7 @@ await articlesDao.update(myItem)
 // >> UPDATE articles SET title = 'My new title' WHERE title = 'My old title'
 await articlesDao.updateWithConditions(myItem, { title: 'My old title' })
 
-// 5 / Delete item
+// 7 / Delete item
 // >> DELETE FROM articles WHERE article_id = 1
 const myItem = await articlesDao.findOne({ articleId: 1 })
 await articlesDao.delete(myItem)

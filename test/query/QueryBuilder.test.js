@@ -36,6 +36,27 @@ describe('QueryBuilder.getSelectQueryWithConditionsObject', () => {
   })
 })
 
+describe('QueryBuilder.getSelectCountQueryWithConditionsObject', () => {
+  it('Should generate basic SQL SELECT query (no conditions)', () => {
+    const sut = new QueryBuilder({ name: 'articles', schema: 'secured' })
+    const select = sut.getSelectCountQueryWithConditionsObject()
+    expect(select.text).to.be.equal('SELECT COUNT(*) as count FROM secured.articles AS articles')
+    expect(select.values).to.be.eql([])
+  })
+  it('Should generate SQL SELECT query with single condition', () => {
+    const sut = new QueryBuilder({ name: 'articles', schema: 'secured' })
+    const select = sut.getSelectCountQueryWithConditionsObject({ article_id: randomData.articleId })
+    expect(select.text).to.be.equal('SELECT COUNT(*) as count FROM secured.articles AS articles WHERE article_id = $1')
+    expect(select.values).to.be.eql([randomData.articleId])
+  })
+  it('Should generate SQL SELECT query with multiple conditions', () => {
+    const sut = new QueryBuilder({ name: 'articles', schema: 'secured' })
+    const select = sut.getSelectCountQueryWithConditionsObject({ article_id: randomData.articleId, product_id: randomData.productId })
+    expect(select.text).to.be.equal('SELECT COUNT(*) as count FROM secured.articles AS articles WHERE article_id = $1 AND product_id = $2')
+    expect(select.values).to.be.eql([randomData.articleId, randomData.productId])
+  })
+})
+
 describe('QueryBuilder.getInsertQuery', () => {
   it('Should generate basic SQL INSERT query', () => {
     const sut = new QueryBuilder({ name: 'articles', schema: 'secured' })

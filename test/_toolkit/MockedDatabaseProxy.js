@@ -9,10 +9,14 @@ class MockedDatabaseProxy {
   query(query) {
     this.$queries.push(query)
     const values = query.values
-    if (values.length === 1) {
-      return Promise.resolve(this.$data.filter(a => a.article_id === values[0]))
+    if (query.text.indexOf('COUNT(*)') !== -1) {
+      return [{ count: this.$data.length }]
     } else {
-      return Promise.resolve(this.$data)
+      if (values.length === 1) {
+        return Promise.resolve(this.$data.filter(a => a.article_id === values[0]))
+      } else {
+        return Promise.resolve(this.$data)
+      }
     }
   }
 }

@@ -100,6 +100,42 @@ describe('Dao.findOne', () => {
   })
 })
 
+describe('Dao.count', () => {
+  it('Should send SQL SELECT to database proxy with no conditions', async () => {
+    // Given
+    const dao = DataSetProvider.getDao_withTableMetadata_withNoColumns_withMockedDatabaseProxy()
+    const databaseProxy = dao.$databaseProxy
+    // When
+    await dao.count()
+    // Expect
+    expect(databaseProxy.$queries).to.be.eql([{
+      text: 'SELECT COUNT(*) as count FROM secured.articles AS articles',
+      values: []
+    }])
+  })
+  it('Should send SQL SELECT to database proxy with conditions', async () => {
+    // Given
+    const dao = DataSetProvider.getDao_withTableMetadata_withNoColumns_withMockedDatabaseProxy()
+    const databaseProxy = dao.$databaseProxy
+    // When
+    await dao.count({ articleId: 1 })
+    // Expect
+    expect(databaseProxy.$queries).to.be.eql([{
+      text: 'SELECT COUNT(*) as count FROM secured.articles AS articles WHERE article_id = $1',
+      values: [1]
+    }])
+  })
+  it('Should return values as transformed objects', async () => {
+    // Given
+    const dao = DataSetProvider.getDao_withTableMetadata_withNoColumns_withMockedDatabaseProxy()
+    const databaseProxy = dao.$databaseProxy
+    // When
+    const result = await dao.count({ articleId: 1 })
+    // Expect
+    expect(result).to.be.equal(2)
+  })
+})
+
 describe('Dao.create', () => {
   it('Should send SQL INSERT to database proxy', async () => {
     // Given
