@@ -61,31 +61,31 @@ describe('QueryBuilder.getInsertQuery', () => {
   it('Should generate basic SQL INSERT query', () => {
     const sut = new QueryBuilder({ name: 'articles', schema: 'secured' })
     const insert = sut.getInsertQuery({ title: 'Toto', reference: 1 })
-    expect(insert.text).to.be.equal('INSERT INTO secured.articles (title, reference) VALUES ($1, $2)')
+    expect(insert.text).to.be.equal('INSERT INTO secured.articles (title, reference) VALUES ($1, $2) RETURNING *')
     expect(insert.values).to.be.eql(['Toto', 1])
   })
   it('Should generate SQL INSERT query with multiple inserted values (2)', () => {
     const sut = new QueryBuilder({ name: 'articles', schema: 'secured' })
     const insert = sut.getInsertQuery([{ title: 'Toto', reference: 1 }, { title: 'Titi', reference: 2 }])
-    expect(insert.text).to.be.equal('INSERT INTO secured.articles (title, reference) VALUES ($1, $2), ($3, $4)')
+    expect(insert.text).to.be.equal('INSERT INTO secured.articles (title, reference) VALUES ($1, $2), ($3, $4) RETURNING *')
     expect(insert.values).to.be.eql(['Toto', 1, 'Titi', 2])
   })
   it('Should generate SQL INSERT query with multiple inserted values (3)', () => {
     const sut = new QueryBuilder({ name: 'articles', schema: 'secured' })
     const insert = sut.getInsertQuery([{ title: 'Toto', reference: 1 }, { title: 'Titi', reference: 2 }, { title: 'Tata', reference: 3 }])
-    expect(insert.text).to.be.equal('INSERT INTO secured.articles (title, reference) VALUES ($1, $2), ($3, $4), ($5, $6)')
+    expect(insert.text).to.be.equal('INSERT INTO secured.articles (title, reference) VALUES ($1, $2), ($3, $4), ($5, $6) RETURNING *')
     expect(insert.values).to.be.eql(['Toto', 1, 'Titi', 2, 'Tata', 3])
   })
   it('Should generate SQL INSERT query with multiple inserted values, but different columns', () => {
     const sut = new QueryBuilder({ name: 'articles', schema: 'secured' })
     const insert = sut.getInsertQuery([{ title: 'Toto', reference: 1 }, { title: 'Titi', optional: 3 }])
-    expect(insert.text).to.be.equal('INSERT INTO secured.articles (title, reference, optional) VALUES ($1, $2, $3), ($4, $5, $6)')
+    expect(insert.text).to.be.equal('INSERT INTO secured.articles (title, reference, optional) VALUES ($1, $2, $3), ($4, $5, $6) RETURNING *')
     expect(insert.values).to.be.eql(['Toto', 1, null, 'Titi', null, 3])
   })
   it('Should generate SQL INSERT query with multiple inserted values, but different columns and different count', () => {
     const sut = new QueryBuilder({ name: 'articles', schema: 'secured' })
     const insert = sut.getInsertQuery([{ title: 'Toto', reference: 1 }, { title: 'Titi', reference: 2, optional: 3 }])
-    expect(insert.text).to.be.equal('INSERT INTO secured.articles (title, reference, optional) VALUES ($1, $2, $3), ($4, $5, $6)')
+    expect(insert.text).to.be.equal('INSERT INTO secured.articles (title, reference, optional) VALUES ($1, $2, $3), ($4, $5, $6) RETURNING *')
     expect(insert.values).to.be.eql(['Toto', 1, null, 'Titi', 2, 3])
   })
 })
@@ -94,13 +94,13 @@ describe('QueryBuilder.getUpdateQuery', () => {
   it('Should generate basic SQL UPDATE query', () => {
     const sut = new QueryBuilder({ name: 'articles', schema: 'secured' })
     const update = sut.getUpdateQuery({ title: 'Toto' }, { article_id: 1 })
-    expect(update.text).to.be.equal('UPDATE secured.articles SET title = $1 WHERE article_id = $2')
+    expect(update.text).to.be.equal('UPDATE secured.articles SET title = $1 WHERE article_id = $2 RETURNING *')
     expect(update.values).to.be.eql(['Toto', 1])
   })
   it('Should generate SQL UPDATE query without conditions', () => {
     const sut = new QueryBuilder({ name: 'articles', schema: 'secured' })
     const update = sut.getUpdateQuery({ title: 'Toto' })
-    expect(update.text).to.be.equal('UPDATE secured.articles SET title = $1')
+    expect(update.text).to.be.equal('UPDATE secured.articles SET title = $1 RETURNING *')
     expect(update.values).to.be.eql(['Toto'])
   })
 })
@@ -109,13 +109,13 @@ describe('QueryBuilder.getDeleteQuery', () => {
   it('Should generate basic SQL DELETE query', () => {
     const sut = new QueryBuilder({ name: 'articles', schema: 'secured' })
     const deleteQuery = sut.getDeleteQuery({ article_id: 1 })
-    expect(deleteQuery.text).to.be.equal('DELETE FROM secured.articles WHERE article_id = $1')
+    expect(deleteQuery.text).to.be.equal('DELETE FROM secured.articles WHERE article_id = $1 RETURNING *')
     expect(deleteQuery.values).to.be.eql([1])
   })
   it('Should generate SQL DELETE query without conditions', () => {
     const sut = new QueryBuilder({ name: 'articles', schema: 'secured' })
     const deleteQuery = sut.getDeleteQuery()
-    expect(deleteQuery.text).to.be.equal('DELETE FROM secured.articles')
+    expect(deleteQuery.text).to.be.equal('DELETE FROM secured.articles RETURNING *')
     expect(deleteQuery.values).to.be.eql([])
   })
 })
@@ -132,12 +132,12 @@ describe('QueryBuilder.$appendWhereConditionIfNeeded', () => {
   it('Should append WHERE clause where conditions given', () => {
     const sut = new QueryBuilder({ name: 'articles', schema: 'secured' })
     const condition = sut.$appendWhereConditionIfNeeded('SQL_STRING', { text: 'article_id = $1', values: [1] })
-    expect(condition).to.be.equal('SQL_STRING WHERE article_id = $1')
+    expect(condition).to.be.equal('SQL_STRING WHERE article_id = $1 RETURNING *')
   })
   it('Should not append WHERE clause where no conditions given', () => {
     const sut = new QueryBuilder({ name: 'articles', schema: 'secured' })
     const condition = sut.$appendWhereConditionIfNeeded('SQL_STRING')
-    expect(condition).to.be.equal('SQL_STRING')
+    expect(condition).to.be.equal('SQL_STRING RETURNING *')
   })
 })
 

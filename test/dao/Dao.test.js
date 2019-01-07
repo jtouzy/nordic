@@ -181,7 +181,7 @@ describe('Dao.create', () => {
     await dao.create({ title: 'Toto', articleId: 1 })
     // Expect
     expect(databaseProxy.$queries).to.be.eql([{
-      text: 'INSERT INTO secured.articles (title, article_id) VALUES ($1, $2)',
+      text: 'INSERT INTO secured.articles (title, article_id) VALUES ($1, $2) RETURNING *',
       values: ['Toto', 1]
     }])
   })
@@ -205,7 +205,7 @@ describe('Dao.update', () => {
     await dao.update({ title: 'Toto', articleId: 1 })
     // Expect
     expect(databaseProxy.$queries).to.be.eql([{
-      text: 'UPDATE secured.articles SET title = $1 WHERE article_id = $2',
+      text: 'UPDATE secured.articles SET title = $1 WHERE article_id = $2 RETURNING *',
       values: ['Toto', 1]
     }])
   })
@@ -229,7 +229,7 @@ describe('Dao.updateWithConditions', () => {
     await dao.updateWithConditions({ title: 'Toto' }, { title: 'Titi' })
     // Expect
     expect(databaseProxy.$queries).to.be.eql([{
-      text: 'UPDATE secured.articles SET title = $1 WHERE title = $2',
+      text: 'UPDATE secured.articles SET title = $1 WHERE title = $2 RETURNING *',
       values: ['Toto', 'Titi']
     }])
   })
@@ -253,7 +253,7 @@ describe('Dao.delete', () => {
     await dao.delete({ title: 'Toto', articleId: 1 })
     // Expect
     expect(databaseProxy.$queries).to.be.eql([{
-      text: 'DELETE FROM secured.articles WHERE article_id = $1',
+      text: 'DELETE FROM secured.articles WHERE article_id = $1 RETURNING *',
       values: [1]
     }])
   })
@@ -277,7 +277,7 @@ describe('Dao.deleteWithConditions', () => {
     await dao.deleteWithConditions({ title: 'Toto', articleId: 1 })
     // Expect
     expect(databaseProxy.$queries).to.be.eql([{
-      text: 'DELETE FROM secured.articles WHERE title = $1 AND article_id = $2',
+      text: 'DELETE FROM secured.articles WHERE title = $1 AND article_id = $2 RETURNING *',
       values: ['Toto', 1]
     }])
   })

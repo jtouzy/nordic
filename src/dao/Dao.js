@@ -40,29 +40,34 @@ class Dao {
   async create(objectOrArray) {
     const convertedObjectOrArray = this.$dataProxy.objectToDatabase(objectOrArray)
     const query = this.$queryBuilder.getInsertQuery(convertedObjectOrArray)
-    await this.$databaseProxy.queryWithTransaction(query)
+    const result = await this.$databaseProxy.queryWithTransaction(query)
+    return this.$dataProxy.databaseToObject(!Array.isArray(objectOrArray) ? result[0] : result)
   }
   async update(object) {
     const conditionsObject = this.$getPrimaryKeyConditionsFromObject(object)
     const updatedValues = this.$getUpdatedValuesFrom(object, conditionsObject, { excludeConditions: true })
     const query = this.$queryBuilder.getUpdateQuery(updatedValues, conditionsObject)
-    await this.$databaseProxy.queryWithTransaction(query)
+    const result = await this.$databaseProxy.queryWithTransaction(query)
+    return this.$dataProxy.databaseToObject(result[0])
   }
   async updateWithConditions(object, conditions) {
     const conditionsObject = this.$getConditionsObjectFromArgument(conditions)
     const updatedValues = this.$getUpdatedValuesFrom(object, conditionsObject)
     const query = this.$queryBuilder.getUpdateQuery(updatedValues, conditionsObject)
-    await this.$databaseProxy.queryWithTransaction(query)
+    const result = await this.$databaseProxy.queryWithTransaction(query)
+    return this.$dataProxy.databaseToObject(result)
   }
   async delete(object) {
     const conditionsObject = this.$getPrimaryKeyConditionsFromObject(object)
     const query = this.$queryBuilder.getDeleteQuery(conditionsObject)
-    await this.$databaseProxy.queryWithTransaction(query)
+    const result = await this.$databaseProxy.queryWithTransaction(query)
+    return this.$dataProxy.databaseToObject(result[0])
   }
   async deleteWithConditions(conditions) {
     const conditionsObject = this.$getConditionsObjectFromArgument(conditions)
     const query = this.$queryBuilder.getDeleteQuery(conditionsObject)
-    await this.$databaseProxy.queryWithTransaction(query)
+    const result = await this.$databaseProxy.queryWithTransaction(query)
+    return this.$dataProxy.databaseToObject(result)
   }
   $getUpdatedValuesFrom(object, conditionsObject, options = { excludeConditions: false }) {
     const { excludeConditions } = options

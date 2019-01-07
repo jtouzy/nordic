@@ -18,7 +18,7 @@ class QueryBuilder {
     const conditions = this.getConditionsWithObject(conditionsObject)
     const { text, values } = this.getSelectQuery()
     return {
-      text: this.$appendWhereConditionIfNeeded(text, conditions),
+      text: this.$appendWhereConditionIfNeeded(text, conditions, false),
       values: values.concat(conditions.values)
     }
   }
@@ -26,7 +26,7 @@ class QueryBuilder {
     const conditions = this.getConditionsWithObject(conditionsObject)
     const { text, values } = this.getSelectCountQuery()
     return {
-      text: this.$appendWhereConditionIfNeeded(text, conditions),
+      text: this.$appendWhereConditionIfNeeded(text, conditions, false),
       values: values.concat(conditions.values)
     }
   }
@@ -40,7 +40,7 @@ class QueryBuilder {
     }, []))]
     const valuesQuery = createdItems.map((newItem, index) => `(${allKeys.map((k, idx) => `$${ idx + 1 + (allKeys.length*index) }`).join(', ')})`).join(', ')
     return {
-      text: `INSERT INTO ${this.getTableWithSchemaClause()} (${allKeys.join(', ')}) VALUES ${valuesQuery}`,
+      text: `INSERT INTO ${this.getTableWithSchemaClause()} (${allKeys.join(', ')}) VALUES ${valuesQuery} RETURNING *`,
       values: createdItems.reduce((accumulator, newItem) => {
         return accumulator.concat(allKeys.map(k => newItem[k] ? newItem[k] : null))
       }, [])
@@ -67,9 +67,9 @@ class QueryBuilder {
   getTableWithSchemaClause() {
     return `${this.$tableMetadata.schema}.${this.$tableMetadata.name}`
   }
-  $appendWhereConditionIfNeeded(query, conditions) {
+  $appendWhereConditionIfNeeded(query, conditions, appendReturning = true) {
     const hasConditions = conditions && conditions.values && conditions.values.length > 0
-    return `${query}${hasConditions ? ` WHERE ${conditions.text}` : ''}`
+    return `${query}${hasConditions ? ` WHERE ${conditions.text}` : ''}${appendReturning ? ' RETURNING *' : ''}`
   }
   getConditionsWithObject(conditionsObject, separator = 'AND', indexOffset = 0) {
     const conditionKeys = Object.keys(conditionsObject || {})
