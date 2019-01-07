@@ -1,10 +1,15 @@
 class MockedDatabaseProxy {
   constructor() {
+    this.$transactionInProgress = false
     this.$queries = []
     this.$data = [
       { article_id: 1, title: 'article1' },
       { article_id: 2, title: 'article2' }
     ]
+  }
+  queryWithTransaction(query) {
+    this.$transactionInProgress = true
+    return this.query(query)
   }
   query(query) {
     this.$queries.push(query)

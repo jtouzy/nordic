@@ -73,8 +73,14 @@ class Nordic {
     }
     return this.$databaseMetadata
   }
-  async shutdown() {
-    await this.$databaseProxy.close()
+  async commit() {
+    await this.$databaseProxy.commit()
+  }
+  async rollback() {
+    await this.$databaseProxy.rollback()
+  }
+  async shutdown(commitTransaction = true) {
+    await this.$databaseProxy.close(commitTransaction)
   }
 }
 

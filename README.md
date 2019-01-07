@@ -105,6 +105,26 @@ await articlesDao.delete(myItem)
 await articlesDao.deleteWithConditions({ title: 'My title' })
 ```
 
+### Transactional mode
+
+As soon as an `INSERT`, `UPDATE`, or `DELETE` query is launched, a transaction is opened in the current database session. This transaction should be closed when you needed it, or at the connection shutdown. See the example below.
+
+```javascript
+// 1 - Delete called. A DB transaction will start.
+await articlesDao.delete(oldItem)
+// 2 - Create another one. This is executed in the same DB transaction.
+await articlesDao.create(newItem)
+// 3 - My service is done. End connection with shutdown, and force COMMIT transaction.
+await Nordic.shutdown(true)
+
+// If you want to rollback the transaction on shutdown, just update the boolean value
+await Nordic.shutdown(false)
+
+// You can manually commit/rollback if you want, and the next INSERT/UPDATE or DELETE query will start another transaction.
+await Nordic.commit()
+await Nordic.rollback()
+```
+
 ## Customization
 
 ### Options configuration

@@ -21,11 +21,10 @@ class DatabaseProxy {
   async $closeTransactionIfNeeded(commitTransaction = false) {
     if (this.$isTransactionInProgress) {
       if (commitTransaction) {
-        await this.$pgClient.query('COMMIT')
+        await this.commit()
       } else {
-        await this.$pgClient.query('ROLLBACK')
+        await this.rollback()
       }
-      this.$isTransactionInProgress = false
     }
   }
   async $executeQuery(query) {
@@ -41,7 +40,15 @@ class DatabaseProxy {
     await this.$connectIfNeeded()
     return await this.$executeQuery(query)
   }
-  async close(commitTransaction = false) {
+  async commit() {
+    await this.$pgClient.query('COMMIT')
+    this.$isTransactionInProgress = false
+  }
+  async rollback() {
+    await this.$pgClient.query('ROLLBACK')
+    this.$isTransactionInProgress = false
+  }
+  async close(commitTransaction = true) {
     if (this.$isConnected) {
       await this.$closeTransactionIfNeeded(commitTransaction)
       await this.$pgClient.end()

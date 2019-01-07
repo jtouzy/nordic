@@ -36,6 +36,15 @@ describe('Dao.findAll', () => {
       { articleId: 2, title: 'article2' }
     ])
   })
+  it('Should not start a transaction in database', async () => {
+    // Given
+    const dao = DataSetProvider.getDao_withTableMetadata_withNoColumns_withMockedDatabaseProxy()
+    const databaseProxy = dao.$databaseProxy
+    // When
+    const result = await dao.findAll()
+    // Expect
+    expect(databaseProxy.$transactionInProgress).to.be.equal(false)
+  })
 })
 
 describe('Dao.find', () => {
@@ -74,6 +83,15 @@ describe('Dao.find', () => {
       { articleId: 1, title: 'article1' }
     ])
   })
+  it('Should not start a transaction in database', async () => {
+    // Given
+    const dao = DataSetProvider.getDao_withTableMetadata_withNoColumns_withMockedDatabaseProxy()
+    const databaseProxy = dao.$databaseProxy
+    // When
+    const result = await dao.find({ articleId: 1 })
+    // Expect
+    expect(databaseProxy.$transactionInProgress).to.be.equal(false)
+  })
 })
 
 describe('Dao.findOne', () => {
@@ -97,6 +115,15 @@ describe('Dao.findOne', () => {
     const result = await dao.findOne({ articleId: 1 })
     // Expect
     expect(result).to.be.eql({ articleId: 1, title: 'article1' })
+  })
+  it('Should not start a transaction in database', async () => {
+    // Given
+    const dao = DataSetProvider.getDao_withTableMetadata_withNoColumns_withMockedDatabaseProxy()
+    const databaseProxy = dao.$databaseProxy
+    // When
+    const result = await dao.findOne({ articleId: 1 })
+    // Expect
+    expect(databaseProxy.$transactionInProgress).to.be.equal(false)
   })
 })
 
@@ -134,6 +161,15 @@ describe('Dao.count', () => {
     // Expect
     expect(result).to.be.equal(2)
   })
+  it('Should not start a transaction in database', async () => {
+    // Given
+    const dao = DataSetProvider.getDao_withTableMetadata_withNoColumns_withMockedDatabaseProxy()
+    const databaseProxy = dao.$databaseProxy
+    // When
+    const result = await dao.count({ articleId: 1 })
+    // Expect
+    expect(databaseProxy.$transactionInProgress).to.be.equal(false)
+  })
 })
 
 describe('Dao.create', () => {
@@ -148,6 +184,15 @@ describe('Dao.create', () => {
       text: 'INSERT INTO secured.articles (title, article_id) VALUES ($1, $2)',
       values: ['Toto', 1]
     }])
+  })
+  it('Should start a transaction in database', async () => {
+    // Given
+    const dao = DataSetProvider.getDao_withTableMetadata_withColumns_withOnePrimaryKey_requiredColumns_withMockedDatabaseProxy()
+    const databaseProxy = dao.$databaseProxy
+    // When
+    await dao.create({ title: 'Toto', articleId: 1 })
+    // Expect
+    expect(databaseProxy.$transactionInProgress).to.be.equal(true)
   })
 })
 
@@ -164,6 +209,15 @@ describe('Dao.update', () => {
       values: ['Toto', 1]
     }])
   })
+  it('Should start a transaction in database', async () => {
+    // Given
+    const dao = DataSetProvider.getDao_withTableMetadata_withColumns_withOnePrimaryKey_requiredColumns_withMockedDatabaseProxy()
+    const databaseProxy = dao.$databaseProxy
+    // When
+    await dao.update({ title: 'Toto', articleId: 1 })
+    // Expect
+    expect(databaseProxy.$transactionInProgress).to.be.equal(true)
+  })
 })
 
 describe('Dao.updateWithConditions', () => {
@@ -178,6 +232,15 @@ describe('Dao.updateWithConditions', () => {
       text: 'UPDATE secured.articles SET title = $1 WHERE title = $2',
       values: ['Toto', 'Titi']
     }])
+  })
+  it('Should start a transaction in database', async () => {
+    // Given
+    const dao = DataSetProvider.getDao_withTableMetadata_withColumns_withOnePrimaryKey_requiredColumns_withMockedDatabaseProxy()
+    const databaseProxy = dao.$databaseProxy
+    // When
+    await dao.updateWithConditions({ title: 'Toto' }, { title: 'Titi' })
+    // Expect
+    expect(databaseProxy.$transactionInProgress).to.be.equal(true)
   })
 })
 
@@ -194,6 +257,15 @@ describe('Dao.delete', () => {
       values: [1]
     }])
   })
+  it('Should start a transaction in database', async () => {
+    // Given
+    const dao = DataSetProvider.getDao_withTableMetadata_withColumns_withOnePrimaryKey_requiredColumns_withMockedDatabaseProxy()
+    const databaseProxy = dao.$databaseProxy
+    // When
+    await dao.delete({ title: 'Toto', articleId: 1 })
+    // Expect
+    expect(databaseProxy.$transactionInProgress).to.be.equal(true)
+  })
 })
 
 describe('Dao.deleteWithConditions', () => {
@@ -208,6 +280,15 @@ describe('Dao.deleteWithConditions', () => {
       text: 'DELETE FROM secured.articles WHERE title = $1 AND article_id = $2',
       values: ['Toto', 1]
     }])
+  })
+  it('Should start a transaction in database', async () => {
+    // Given
+    const dao = DataSetProvider.getDao_withTableMetadata_withColumns_withOnePrimaryKey_requiredColumns_withMockedDatabaseProxy()
+    const databaseProxy = dao.$databaseProxy
+    // When
+    await dao.deleteWithConditions({ title: 'Toto', articleId: 1 })
+    // Expect
+    expect(databaseProxy.$transactionInProgress).to.be.equal(true)
   })
 })
 
