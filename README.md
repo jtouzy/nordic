@@ -161,7 +161,19 @@ To work well with primary keys or column definitions, Nordic needs to know more 
 
 Of course, for performance purpose (and for serverless/microservices target), it's recommanded to give those metadata to your Nordic instance on the initialization phase like below.
 
-<< TODO >>
+First, use `nordic` command line tool to generate a static file for your database metadata.
+
+```bash
+./node_modules/.bin/nordic md
+```
+
+The command line tool will ask you some informations to access your database. You should give an account with access to the `information_schema` of your database instance. And when the connection is made, a `nordic-metadata.json` file will be generated. You can use it to give nordic all informations about your database metadata, like below (in the configuration options).
+
+```javascript
+{
+  metadataPath: 'my/pathto/nordic/metadata.json'
+}
+```
 
 ### Writing your own dao classes
 
