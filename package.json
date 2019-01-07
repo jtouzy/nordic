@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "description": "Another nodejs ORM for postgres. Serverless and lightweight approach.",
   "main": "index.js",
+  "bin": {
+    "nordic": "./bin/index.js"
+  },
   "scripts": {
     "test": "./node_modules/.bin/mocha \"./test/**/*.test.js\""
   },
