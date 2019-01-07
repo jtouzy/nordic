@@ -18,14 +18,18 @@ class Dao {
     const result = await this.$databaseProxy.query(query)
     return result.length === 0 ? result : this.$dataProxy.databaseToObject(result)
   }
-  async findOne(identifier) {
-    const conditionsObject = this.$getConditionsObjectFromArgument(identifier)
+  async find(conditions) {
+    const conditionsObject = this.$getConditionsObjectFromArgument(conditions)
     const query = this.$queryBuilder.getSelectQueryWithConditionsObject(conditionsObject)
     const result = await this.$databaseProxy.query(query)
+    return this.$dataProxy.databaseToObject(result)
+  }
+  async findOne(conditions) {
+    const result = await this.find(conditions)
     if (result.length > 1) {
       throw new Error(`Multiple rows fetched from database in a findOne() query`)
     }
-    return result.length === 0 ? result : this.$dataProxy.databaseToObject(result[0])
+    return result.length === 0 ? result : result[0]
   }
   async create(objectOrArray) {
     const convertedObjectOrArray = this.$dataProxy.objectToDatabase(objectOrArray)

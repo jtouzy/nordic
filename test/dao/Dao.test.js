@@ -38,6 +38,44 @@ describe('Dao.findAll', () => {
   })
 })
 
+describe('Dao.find', () => {
+  it('Should send SQL SELECT to database proxy with no conditions', async () => {
+    // Given
+    const dao = DataSetProvider.getDao_withTableMetadata_withNoColumns_withMockedDatabaseProxy()
+    const databaseProxy = dao.$databaseProxy
+    // When
+    await dao.find()
+    // Expect
+    expect(databaseProxy.$queries).to.be.eql([{
+      text: 'SELECT * FROM secured.articles AS articles',
+      values: []
+    }])
+  })
+  it('Should send SQL SELECT to database proxy with conditions', async () => {
+    // Given
+    const dao = DataSetProvider.getDao_withTableMetadata_withNoColumns_withMockedDatabaseProxy()
+    const databaseProxy = dao.$databaseProxy
+    // When
+    await dao.find({ articleId: 1 })
+    // Expect
+    expect(databaseProxy.$queries).to.be.eql([{
+      text: 'SELECT * FROM secured.articles AS articles WHERE article_id = $1',
+      values: [1]
+    }])
+  })
+  it('Should return values as transformed objects', async () => {
+    // Given
+    const dao = DataSetProvider.getDao_withTableMetadata_withNoColumns_withMockedDatabaseProxy()
+    const databaseProxy = dao.$databaseProxy
+    // When
+    const result = await dao.find({ articleId: 1 })
+    // Expect
+    expect(result).to.be.eql([
+      { articleId: 1, title: 'article1' }
+    ])
+  })
+})
+
 describe('Dao.findOne', () => {
   it('Should send SQL SELECT to database proxy', async () => {
     // Given
