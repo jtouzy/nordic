@@ -1,8 +1,6 @@
 # nordic
 Another nodejs ORM for postgres. Serverless and lightweight approach.
 
-**⚠️ This doc is currently in progress, like the framework is under development.**
-
 ## Installation
 
 Install nordic package with npm.
@@ -11,7 +9,21 @@ Install nordic package with npm.
 npm install nordic --save
 ```
 
-## Basic start
+## Quick example
+
+Below a quick example of connecting to your database and creating an article in few lines.
+
+```javascript
+const { nordic } = require('nordic')
+const credentials = require('myDatabaseSuperSecuredCredentials.json')
+
+nordic.initialize(credentials)
+const dao = await nordic.getDao('articles')
+const article = await dao.create({ name: 'My super article' })
+await nordic.shutdown()
+```
+
+## How to start
 
 Simply get the nordic instance.
 
