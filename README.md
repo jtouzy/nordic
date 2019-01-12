@@ -2,7 +2,7 @@
 
 Another nodejs ORM for postgres. Serverless and lightweight approach.
 
-[See changelog](#changelog)
+[See changelog](https://github.com/jtouzy/nordic/releases)
 
 ## Installation
 
@@ -215,10 +215,3 @@ class ProductDao extends Dao {
   // Add your own functions here...
 }
 ```
-
-## Changelog
-
-### 0.2.0
-
-* Normalize nordic instance name (lowercased)
-* Fix false/0 values on given objets in dao mutations
