@@ -1,7 +1,7 @@
-const Nordic = require('./src/Nordic')
+const nordic = require('./src/nordic')
 const Dao = require('./src/dao/Dao')
 
 module.exports = {
-  Nordic,
+  nordic,
   Dao
 }

@@ -1,29 +1,29 @@
 const { expect } = require('chai')
 const fs = require('fs')
 const path = require('path')
-const Nordic = require('../src/Nordic')
+const nordic = require('../src/nordic')
 const MockedDatabaseProxy = require('./_toolkit/MockedDatabaseProxy')
 
-describe('Nordic.$initializeDatabaseMetadata', () => {
+describe('nordic.$initializeDatabaseMetadata', () => {
   it('Should read metadata file and store it', () => {
     // Given
     const metadataPath = path.resolve(__dirname, '_toolkit', 'test-metadata.json')
     const fileContent = fs.readFileSync(metadataPath, 'utf8')
     // When
-    Nordic.$initializeDatabaseMetadata(metadataPath)
+    nordic.$initializeDatabaseMetadata(metadataPath)
     // Expect
-    expect(Nordic.$databaseMetadata).to.be.equal(fileContent)
+    expect(nordic.$databaseMetadata).to.be.equal(fileContent)
   })
 })
 
-describe('Nordic.rawQuery', () => {
+describe('nordic.rawQuery', () => {
   it('Should call database proxy with given query, with no parameters', async () => {
     // Given
     const mockedDatabaseProxy = new MockedDatabaseProxy()
-    Nordic.$initializeDataProxy()
-    Nordic.$databaseProxy = mockedDatabaseProxy
+    nordic.$initializeDataProxy()
+    nordic.$databaseProxy = mockedDatabaseProxy
     // When
-    await Nordic.rawQuery('SELECT * FROM articles')
+    await nordic.rawQuery('SELECT * FROM articles')
     // Expect
     expect(mockedDatabaseProxy.$queries).to.be.eql([{
       text: 'SELECT * FROM articles',
@@ -33,10 +33,10 @@ describe('Nordic.rawQuery', () => {
   it('Should call database proxy with given query, with one parameter', async () => {
     // Given
     const mockedDatabaseProxy = new MockedDatabaseProxy()
-    Nordic.$initializeDataProxy()
-    Nordic.$databaseProxy = mockedDatabaseProxy
+    nordic.$initializeDataProxy()
+    nordic.$databaseProxy = mockedDatabaseProxy
     // When
-    await Nordic.rawQuery('SELECT * FROM articles WHERE article_id = :id', {
+    await nordic.rawQuery('SELECT * FROM articles WHERE article_id = :id', {
       id: 1
     })
     // Expect
@@ -48,10 +48,10 @@ describe('Nordic.rawQuery', () => {
   it('Should call database proxy with given query, with multiple parameters', async () => {
     // Given
     const mockedDatabaseProxy = new MockedDatabaseProxy()
-    Nordic.$initializeDataProxy()
-    Nordic.$databaseProxy = mockedDatabaseProxy
+    nordic.$initializeDataProxy()
+    nordic.$databaseProxy = mockedDatabaseProxy
     // When
-    await Nordic.rawQuery('SELECT * FROM articles WHERE article_id = :id AND article_title = :title', {
+    await nordic.rawQuery('SELECT * FROM articles WHERE article_id = :id AND article_title = :title', {
       id: 1,
       title: 'Title of article'
     })
@@ -64,10 +64,10 @@ describe('Nordic.rawQuery', () => {
   /*it('Should call database proxy with given query, with multiple parameters with same names', async () => {
     // Given
     const mockedDatabaseProxy = new MockedDatabaseProxy()
-    Nordic.$initializeDataProxy()
-    Nordic.$databaseProxy = mockedDatabaseProxy
+    nordic.$initializeDataProxy()
+    nordic.$databaseProxy = mockedDatabaseProxy
     // When
-    await Nordic.rawQuery('SELECT * FROM articles WHERE article_id = :id AND article_title = :id', {
+    await nordic.rawQuery('SELECT * FROM articles WHERE article_id = :id AND article_title = :id', {
       id: 1
     })
     // Expect

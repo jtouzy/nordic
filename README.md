@@ -1,5 +1,8 @@
 # nordic
+
 Another nodejs ORM for postgres. Serverless and lightweight approach.
+
+[See changelog](#changelog)
 
 ## Installation
 
@@ -127,14 +130,14 @@ await articlesDao.delete(oldItem)
 // 2 - Create another one. This is executed in the same DB transaction.
 await articlesDao.create(newItem)
 // 3 - My service is done. End connection with shutdown, and force COMMIT transaction.
-await Nordic.shutdown(true)
+await nordic.shutdown(true)
 
 // If you want to rollback the transaction on shutdown, just update the boolean value
-await Nordic.shutdown(false)
+await nordic.shutdown(false)
 
 // You can manually commit/rollback if you want, and the next INSERT/UPDATE or DELETE query will start another transaction.
-await Nordic.commit()
-await Nordic.rollback()
+await nordic.commit()
+await nordic.rollback()
 ```
 
 ## Customization
@@ -171,9 +174,9 @@ By default, no transformations are made to the objects fetched-from or stored-to
 
 #### Database metadata
 
-To work well with primary keys or column definitions, Nordic needs to know more about your database metadata. When you're getting your first Dao object, Nordic will fetch this data from database.
+To work well with primary keys or column definitions, nordic needs to know more about your database metadata. When you're getting your first Dao object, nordic will fetch this data from database.
 
-Of course, for performance purpose (and for serverless/microservices target), it's recommanded to give those metadata to your Nordic instance on the initialization phase like below.
+Of course, for performance purpose (and for serverless/microservices target), it's recommanded to give those metadata to your nordic instance on the initialization phase like below.
 
 First, use `nordic` command line tool to generate a static file for your database metadata.
 
@@ -191,7 +194,7 @@ The command line tool will ask you some informations to access your database. Yo
 
 ### Writing your own dao classes
 
-You can customize your dao instances with your additional functions by overriding Dao class. You must provide an entity() static function to allow Nordic to retrieve the linked table.
+You can customize your dao instances with your additional functions by overriding Dao class. You must provide an entity() static function to allow nordic to retrieve the linked table.
 
 ```javascript
 const { Dao } = require('nordic')
@@ -212,3 +215,10 @@ class ProductDao extends Dao {
   // Add your own functions here...
 }
 ```
+
+## Changelog
+
+### 0.2.0
+
+* Normalize nordic instance name (lowercased)
+* Fix false/0 values on given objets in dao mutations
