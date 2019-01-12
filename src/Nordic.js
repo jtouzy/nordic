@@ -17,7 +17,8 @@ class Nordic {
   }
   $initializeDatabaseMetadata(metadataPath) {
     if (metadataPath) {
-      this.$databaseMetadata = fs.readFileSync(metadataPath, 'utf8')
+      const fileContent = fs.readFileSync(metadataPath, 'utf8')
+      this.$databaseMetadata = JSON.parse(fileContent)
     }
   }
   async getDao(daoClassOrEntityProperties) {
