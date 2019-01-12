@@ -64,6 +64,12 @@ describe('QueryBuilder.getInsertQuery', () => {
     expect(insert.text).to.be.equal('INSERT INTO secured.articles (title, reference) VALUES ($1, $2) RETURNING *')
     expect(insert.values).to.be.eql(['Toto', 1])
   })
+  it('Should generate SQL INSERT query with boolean values', () => {
+    const sut = new QueryBuilder({ name: 'articles', schema: 'secured' })
+    const insert = sut.getInsertQuery([{ title: 'Toto', edited: false }])
+    expect(insert.text).to.be.equal('INSERT INTO secured.articles (title, edited) VALUES ($1, $2) RETURNING *')
+    expect(insert.values).to.be.eql(['Toto', false])
+  })
   it('Should generate SQL INSERT query with multiple inserted values (2)', () => {
     const sut = new QueryBuilder({ name: 'articles', schema: 'secured' })
     const insert = sut.getInsertQuery([{ title: 'Toto', reference: 1 }, { title: 'Titi', reference: 2 }])
@@ -96,6 +102,12 @@ describe('QueryBuilder.getUpdateQuery', () => {
     const update = sut.getUpdateQuery({ title: 'Toto' }, { article_id: 1 })
     expect(update.text).to.be.equal('UPDATE secured.articles SET title = $1 WHERE article_id = $2 RETURNING *')
     expect(update.values).to.be.eql(['Toto', 1])
+  })
+  it('Should generate basic SQL UPDATE query with boolean values', () => {
+    const sut = new QueryBuilder({ name: 'articles', schema: 'secured' })
+    const update = sut.getUpdateQuery({ title: 'Toto', edited: false }, { article_id: 1 })
+    expect(update.text).to.be.equal('UPDATE secured.articles SET title = $1, edited = $2 WHERE article_id = $3 RETURNING *')
+    expect(update.values).to.be.eql(['Toto', false, 1])
   })
   it('Should generate SQL UPDATE query without conditions', () => {
     const sut = new QueryBuilder({ name: 'articles', schema: 'secured' })
@@ -160,9 +172,15 @@ describe('QueryBuilder.getConditionsWithObject', () => {
     expect(conditions.text).to.be.equal('article_id = $1 , product_id = $2')
     expect(conditions.values).to.be.eql([randomData.articleId, randomData.productId])
   })
+  it('Should generate multiple conditions as text and array of values with given separator and no spacing before', () => {
+    const sut = new QueryBuilder()
+    const conditions = sut.getConditionsWithObject({ article_id: randomData.articleId, product_id: randomData.productId }, ',', false)
+    expect(conditions.text).to.be.equal('article_id = $1, product_id = $2')
+    expect(conditions.values).to.be.eql([randomData.articleId, randomData.productId])
+  })
   it('Should generate multiple conditions as text and array of values with given offset in indexes', () => {
     const sut = new QueryBuilder()
-    const conditions = sut.getConditionsWithObject({ article_id: randomData.articleId, product_id: randomData.productId }, 'AND', 3)
+    const conditions = sut.getConditionsWithObject({ article_id: randomData.articleId, product_id: randomData.productId }, 'AND', true, 3)
     expect(conditions.text).to.be.equal('article_id = $4 AND product_id = $5')
     expect(conditions.values).to.be.eql([randomData.articleId, randomData.productId])
   })

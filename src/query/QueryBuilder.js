@@ -42,13 +42,13 @@ class QueryBuilder {
     return {
       text: `INSERT INTO ${this.getTableWithSchemaClause()} (${allKeys.join(', ')}) VALUES ${valuesQuery} RETURNING *`,
       values: createdItems.reduce((accumulator, newItem) => {
-        return accumulator.concat(allKeys.map(k => newItem[k] ? newItem[k] : null))
+        return accumulator.concat(allKeys.map(k => typeof newItem[k] === 'undefined' ? null : newItem[k]))
       }, [])
     }
   }
   getUpdateQuery(updatedValues, conditionsObject) {
-    const updateExpression = this.getConditionsWithObject(updatedValues, ',')
-    const conditions = this.getConditionsWithObject(conditionsObject, 'AND', updateExpression.values.length)
+    const updateExpression = this.getConditionsWithObject(updatedValues, ',', false)
+    const conditions = this.getConditionsWithObject(conditionsObject, 'AND', true, updateExpression.values.length)
     return {
       text: this.$appendWhereConditionIfNeeded(`UPDATE ${this.getTableWithSchemaClause()} SET ${updateExpression.text}`, conditions),
       values: updateExpression.values.concat(conditions.values)
@@ -71,10 +71,10 @@ class QueryBuilder {
     const hasConditions = conditions && conditions.values && conditions.values.length > 0
     return `${query}${hasConditions ? ` WHERE ${conditions.text}` : ''}${appendReturning ? ' RETURNING *' : ''}`
   }
-  getConditionsWithObject(conditionsObject, separator = 'AND', indexOffset = 0) {
+  getConditionsWithObject(conditionsObject, separator = 'AND', separatorSpaceBefore = true, indexOffset = 0) {
     const conditionKeys = Object.keys(conditionsObject || {})
     return {
-      text: conditionKeys.map((key, index) => `${key} = $${indexOffset+index+1}`).join(` ${separator} `),
+      text: conditionKeys.map((key, index) => `${key} = $${indexOffset+index+1}`).join(`${separatorSpaceBefore ? ' ' : ''}${separator} `),
       values: conditionKeys.map(key => conditionsObject[key])
     }
   }

@@ -72,6 +72,18 @@ describe('Dao.find', () => {
       values: [1]
     }])
   })
+  it('Should send SQL SELECT to database proxy with boolean conditions', async () => {
+    // Given
+    const dao = DataSetProvider.getDao_withTableMetadata_withNoColumns_withMockedDatabaseProxy()
+    const databaseProxy = dao.$databaseProxy
+    // When
+    await dao.find({ edited: false })
+    // Expect
+    expect(databaseProxy.$queries).to.be.eql([{
+      text: 'SELECT * FROM secured.articles AS articles WHERE edited = $1',
+      values: [false]
+    }])
+  })
   it('Should return values as transformed objects', async () => {
     // Given
     const dao = DataSetProvider.getDao_withTableMetadata_withNoColumns_withMockedDatabaseProxy()
@@ -183,6 +195,18 @@ describe('Dao.create', () => {
     expect(databaseProxy.$queries).to.be.eql([{
       text: 'INSERT INTO secured.articles (title, article_id) VALUES ($1, $2) RETURNING *',
       values: ['Toto', 1]
+    }])
+  })
+  it('Should send SQL INSERT to database proxy with boolean values', async () => {
+    // Given
+    const dao = DataSetProvider.getDao_withTableMetadata_withColumns_withOnePrimaryKey_requiredColumns_withMockedDatabaseProxy()
+    const databaseProxy = dao.$databaseProxy
+    // When
+    await dao.create({ title: 'Toto', articleId: 1, edited: false })
+    // Expect
+    expect(databaseProxy.$queries).to.be.eql([{
+      text: 'INSERT INTO secured.articles (title, article_id, edited) VALUES ($1, $2, $3) RETURNING *',
+      values: ['Toto', 1, false]
     }])
   })
   it('Should start a transaction in database', async () => {
