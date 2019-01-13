@@ -9,10 +9,11 @@ describe('nordic.$initializeDatabaseMetadata', () => {
     // Given
     const metadataPath = path.resolve(__dirname, '_toolkit', 'test-metadata.json')
     const fileContent = fs.readFileSync(metadataPath, 'utf8')
+    const jsonMetadata = JSON.parse(fileContent)
     // When
     nordic.$initializeDatabaseMetadata(metadataPath)
     // Expect
-    expect(nordic.$databaseMetadata).to.be.equal(fileContent)
+    expect(nordic.$databaseMetadata).to.be.eql(jsonMetadata)
   })
 })
 
