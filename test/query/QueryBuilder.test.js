@@ -28,11 +28,23 @@ describe('QueryBuilder.getSelectQueryWithConditionsObject', () => {
     expect(select.text).to.be.equal('SELECT * FROM secured.articles AS articles WHERE article_id = $1')
     expect(select.values).to.be.eql([randomData.articleId])
   })
+  it('Should generate SQL SELECT query with array condition', () => {
+    const sut = new QueryBuilder({ name: 'articles', schema: 'secured' })
+    const select = sut.getSelectQueryWithConditionsObject({ article_id: [randomData.articleId, randomData.productId] })
+    expect(select.text).to.be.equal('SELECT * FROM secured.articles AS articles WHERE article_id IN ($1, $2)')
+    expect(select.values).to.be.eql([randomData.articleId, randomData.productId])
+  })
   it('Should generate SQL SELECT query with multiple conditions', () => {
     const sut = new QueryBuilder({ name: 'articles', schema: 'secured' })
     const select = sut.getSelectQueryWithConditionsObject({ article_id: randomData.articleId, product_id: randomData.productId })
     expect(select.text).to.be.equal('SELECT * FROM secured.articles AS articles WHERE article_id = $1 AND product_id = $2')
     expect(select.values).to.be.eql([randomData.articleId, randomData.productId])
+  })
+  it('Should generate SQL SELECT query with multiple conditions including arrays', () => {
+    const sut = new QueryBuilder({ name: 'articles', schema: 'secured' })
+    const select = sut.getSelectQueryWithConditionsObject({ article_id: randomData.articleId, product_id: randomData.productId, reference_id: [randomData.articleId, randomData.productId] })
+    expect(select.text).to.be.equal('SELECT * FROM secured.articles AS articles WHERE article_id = $1 AND product_id = $2 AND reference_id IN ($3, $4)')
+    expect(select.values).to.be.eql([randomData.articleId, randomData.productId, randomData.articleId, randomData.productId])
   })
 })
 

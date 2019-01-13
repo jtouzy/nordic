@@ -74,8 +74,23 @@ class QueryBuilder {
   getConditionsWithObject(conditionsObject, separator = 'AND', separatorSpaceBefore = true, indexOffset = 0) {
     const conditionKeys = Object.keys(conditionsObject || {})
     return {
-      text: conditionKeys.map((key, index) => `${key} = $${indexOffset+index+1}`).join(`${separatorSpaceBefore ? ' ' : ''}${separator} `),
-      values: conditionKeys.map(key => conditionsObject[key])
+      text: conditionKeys.reduce((accumulator, key) => {
+        let nextIndex = accumulator.length + indexOffset + 1
+        const value = conditionsObject[key]
+        if (Array.isArray(value)) {
+          return accumulator.concat([`${key} IN (${value.map(v => {
+            nextIndex = nextIndex + 1
+            return `$${nextIndex - 1}`
+          }).join(', ')})`])
+        } else {
+          nextIndex = nextIndex + 1
+          return accumulator.concat([`${key} = $${nextIndex - 1}`])
+        }
+      }, []).join(`${separatorSpaceBefore ? ' ' : ''}${separator} `),
+      values: conditionKeys.reduce((accumulator, key) => {
+        const value = conditionsObject[key]
+        return accumulator.concat(Array.isArray(value) ? value : [value])
+      }, [])
     }
   }
 }
