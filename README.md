@@ -83,6 +83,8 @@ const allItems = await articlesDao.findAll()
 // 2 / Find items in given table (with properties)
 // >> SELECT * FROM articles WHERE article_id = 1
 const items = await articlesDao.find({ articleId: 1 })
+// >> SELECT * FROM articles WHERE state IN ('CREATED', 'SOLD')
+const items = await articlesDao.find({ state: ['CREATED', 'SOLD'] })
 
 // 3.1 / Find one item in given table (with properties)
 // >> SELECT * FROM articles WHERE article_id = 1 (only first row)
