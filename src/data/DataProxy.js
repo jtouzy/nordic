@@ -20,13 +20,17 @@ class DataProxy {
     }
   }
   $transformDeeply(data, transformFn) {
-    if (typeof data === 'object' && data !== null && !(data instanceof Date)) {
-      return Object.keys(data).reduce((newObject, key) => {
-        newObject[transformFn(key)] = this.$transformDeeply(data[key], transformFn)
-        return newObject
-      }, {})
-    } else if (Array.isArray(data)) {
-      return data.map((d) => this.$transformDeeply(d, transformFn))
+    if (data === null) {
+      return data
+    } else if (typeof data === 'object' && !(data instanceof Date)) {
+      if (Array.isArray(data)) {
+        return data.map((d) => this.$transformDeeply(d, transformFn))
+      } else {
+        return Object.keys(data).reduce((newObject, key) => {
+          newObject[transformFn(key)] = this.$transformDeeply(data[key], transformFn)
+          return newObject
+        }, {})
+      }
     } else {
       return data
     }

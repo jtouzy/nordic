@@ -70,6 +70,12 @@ describe('QueryBuilder.getInsertQuery', () => {
     expect(insert.text).to.be.equal('INSERT INTO secured.articles (title, edited) VALUES ($1, $2) RETURNING *')
     expect(insert.values).to.be.eql(['Toto', false])
   })
+  it('Should generate SQL INSERT query with array values', () => {
+    const sut = new QueryBuilder({ name: 'articles', schema: 'secured' })
+    const insert = sut.getInsertQuery([{ title: 'Toto', properties: ['random', 'cheap'] }])
+    expect(insert.text).to.be.equal('INSERT INTO secured.articles (title, properties) VALUES ($1, $2) RETURNING *')
+    expect(insert.values).to.be.eql(['Toto', ['random', 'cheap']])
+  })
   it('Should generate SQL INSERT query with multiple inserted values (2)', () => {
     const sut = new QueryBuilder({ name: 'articles', schema: 'secured' })
     const insert = sut.getInsertQuery([{ title: 'Toto', reference: 1 }, { title: 'Titi', reference: 2 }])

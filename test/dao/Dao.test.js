@@ -209,6 +209,18 @@ describe('Dao.create', () => {
       values: ['Toto', 1, false]
     }])
   })
+  it('Should send SQL INSERT to database proxy with array values', async () => {
+    // Given
+    const dao = DataSetProvider.getDao_withTableMetadata_withColumns_withOnePrimaryKey_requiredColumns_withMockedDatabaseProxy()
+    const databaseProxy = dao.$databaseProxy
+    // When
+    await dao.create({ title: 'Toto', articleId: 1, producers: ['China', 'France'] })
+    // Expect
+    expect(databaseProxy.$queries).to.be.eql([{
+      text: 'INSERT INTO secured.articles (title, article_id, producers) VALUES ($1, $2, $3) RETURNING *',
+      values: ['Toto', 1, ['China', 'France']]
+    }])
+  })
   it('Should start a transaction in database', async () => {
     // Given
     const dao = DataSetProvider.getDao_withTableMetadata_withColumns_withOnePrimaryKey_requiredColumns_withMockedDatabaseProxy()
