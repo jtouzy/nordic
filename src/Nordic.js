@@ -37,12 +37,13 @@ class Nordic {
   }
   async rawQuery(text, values) {
     const valuesKeys = values ? Object.keys(values) : []
-    return await this.$databaseProxy.query({
+    const result = await this.$databaseProxy.query({
       text: valuesKeys.reduce((accumulator, key, index) => {
         return accumulator.split(`:${key}`).join(`$${index+1}`)
       }, text),
       values: valuesKeys.map(k => values[k])
     })
+    return this.$dataProxy.databaseToObject(result)
   }
   async getTableMetadata({ schema, table }) {
     const databaseMetadata = await this.getDatabaseMetadata()

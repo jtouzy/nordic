@@ -2,6 +2,7 @@ const { expect } = require('chai')
 const fs = require('fs')
 const path = require('path')
 const nordic = require('../src/nordic')
+const toCamelCase = require('lodash.camelcase')
 const MockedDatabaseProxy = require('./_toolkit/MockedDatabaseProxy')
 
 describe('nordic.$initializeDatabaseMetadata', () => {
@@ -77,4 +78,18 @@ describe('nordic.rawQuery', () => {
       values: [1, 1]
     }])
   })*/
+  it('Should get database proxy data and mapping with transform options', async () => {
+    // Given
+    const mockedDatabaseProxy = new MockedDatabaseProxy()
+    nordic.$initializeDataProxy({
+      databaseToObjectKeyTransform: toCamelCase
+    })
+    nordic.$databaseProxy = mockedDatabaseProxy
+    // When
+    const result = await nordic.rawQuery('SELECT * FROM articles WHERE article_id = :id AND article_title = :title', {
+      id: 1
+    })
+    // Expect
+    expect(result).to.be.eql([{ articleId: 1, title: 'article1' }])
+  })
 })
