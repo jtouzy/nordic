@@ -78,6 +78,37 @@ describe('nordic.rawQuery', () => {
       values: [1, 1]
     }])
   })*/
+  it('Should call database proxy with given query, with array parameters', async () => {
+    // Given
+    const mockedDatabaseProxy = new MockedDatabaseProxy()
+    nordic.$initializeDataProxy()
+    nordic.$databaseProxy = mockedDatabaseProxy
+    // When
+    await nordic.rawQuery('SELECT * FROM articles WHERE article_title IN (:title)', {
+      title: ['Title of article', 'Title of article 2']
+    })
+    // Expect
+    expect(mockedDatabaseProxy.$queries).to.be.eql([{
+      text: 'SELECT * FROM articles WHERE article_title IN ($1, $2)',
+      values: ['Title of article', 'Title of article 2']
+    }])
+  })
+  it('Should call database proxy with given query, with multiple parameters with arrays', async () => {
+    // Given
+    const mockedDatabaseProxy = new MockedDatabaseProxy()
+    nordic.$initializeDataProxy()
+    nordic.$databaseProxy = mockedDatabaseProxy
+    // When
+    await nordic.rawQuery('SELECT * FROM articles WHERE article_id = :id AND article_title IN (:title)', {
+      id: 1,
+      title: ['Title of article', 'Title of article 2']
+    })
+    // Expect
+    expect(mockedDatabaseProxy.$queries).to.be.eql([{
+      text: 'SELECT * FROM articles WHERE article_id = $1 AND article_title IN ($2, $3)',
+      values: [1, 'Title of article', 'Title of article 2']
+    }])
+  })
   it('Should get database proxy data and mapping with transform options', async () => {
     // Given
     const mockedDatabaseProxy = new MockedDatabaseProxy()

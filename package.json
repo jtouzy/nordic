@@ -1,6 +1,6 @@
 {
   "name": "nordic",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Another nodejs ORM for postgres. Serverless and lightweight approach.",
   "main": "index.js",
   "bin": {

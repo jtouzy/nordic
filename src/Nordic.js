@@ -36,12 +36,28 @@ class Nordic {
     }
   }
   async rawQuery(text, values) {
-    const valuesKeys = values ? Object.keys(values) : []
+    const queryValues = (values || {})
+    const valuesKeys = Object.keys(queryValues)
+    let nextIndex = 1
     const result = await this.$databaseProxy.query({
       text: valuesKeys.reduce((accumulator, key, index) => {
-        return accumulator.split(`:${key}`).join(`$${index+1}`)
+        let keyReplacement
+        const value = queryValues[key]
+        if (Array.isArray(value)) {
+          keyReplacement = value.map(v => {
+            nextIndex = nextIndex + 1
+            return `$${nextIndex - 1}`
+          }).join(', ')
+        } else {
+          keyReplacement = `$${nextIndex}`
+          nextIndex = nextIndex + 1
+        }
+        return accumulator.split(`:${key}`).join(keyReplacement)
       }, text),
-      values: valuesKeys.map(k => values[k])
+      values: valuesKeys.reduce((accumulator, key) => {
+        const value = queryValues[key]
+        return accumulator.concat(Array.isArray(value) ? value : [value])
+      }, [])
     })
     return this.$dataProxy.databaseToObject(result)
   }
