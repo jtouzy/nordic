@@ -1,7 +1,7 @@
 const { expect } = require('chai')
 const fs = require('fs')
 const path = require('path')
-const nordic = require('../src/nordic')
+const nordic = require('../src/nordicInstance')
 const toCamelCase = require('lodash.camelcase')
 const MockedDatabaseProxy = require('./_toolkit/MockedDatabaseProxy')
 
