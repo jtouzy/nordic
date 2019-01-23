@@ -29,7 +29,7 @@ class Dao {
     if (result.length > 1) {
       throw new Error(`Multiple rows fetched from database in a findOne() query`)
     }
-    return result.length === 0 ? result : result[0]
+    return result.length === 0 ? null : result[0]
   }
   async count(conditions) {
     const conditionsObject = this.$getConditionsObjectFromArgument(conditions)
