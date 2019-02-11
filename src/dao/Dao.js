@@ -35,7 +35,7 @@ class Dao {
     const conditionsObject = this.$getConditionsObjectFromArgument(conditions)
     const query = this.$queryBuilder.getSelectCountQueryWithConditionsObject(conditionsObject)
     const result = await this.$databaseProxy.query(query)
-    return result[0].count
+    return parseInt(result[0].count)
   }
   async create(objectOrArray) {
     const convertedObjectOrArray = this.$dataProxy.objectToDatabase(objectOrArray)
