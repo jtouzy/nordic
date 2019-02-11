@@ -3,7 +3,7 @@
 const fs = require('fs')
 const path = require('path')
 const readline = require('readline')
-const nordic = require('../src/nordic')
+const nordic = require('../src/nordicInstance')
 
 const interface = readline.createInterface({
   input: process.stdin,
