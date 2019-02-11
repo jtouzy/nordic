@@ -7,8 +7,8 @@ const EntityContextFactory = require('./dao/EntityContextFactory')
 
 class Nordic {
   initialize({ host, port, database, user, password, options }) {
-    this.$databaseProxy = new DatabaseProxy({ host, port, database, user, password })
-    const { transform, metadataPath } = (options || {})
+    const { transform, metadataPath, logger } = (options || {})
+    this.$databaseProxy = new DatabaseProxy({ host, port, database, user, password, options: { logger } })
     this.$initializeDataProxy(transform)
     this.$initializeDatabaseMetadata(metadataPath)
   }

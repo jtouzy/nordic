@@ -1,10 +1,11 @@
 const { Client } = require('pg')
 
 class DatabaseProxy {
-  constructor({ host, port, database, user, password }) {
+  constructor({ host, port, database, user, password, options }) {
     this.$pgClient = new Client({ host, port, database, user, password })
     this.$isConnected = false
     this.$isTransactionInProgress = false
+    this.$logger = (options || {}).logger
   }
   async $connectIfNeeded() {
     if (!this.$isConnected) {
@@ -38,6 +39,9 @@ class DatabaseProxy {
   }
   async query(query) {
     await this.$connectIfNeeded()
+    if (typeof this.$logger === 'function') {
+      this.$logger(query)
+    }
     return await this.$executeQuery(query)
   }
   async commit() {
