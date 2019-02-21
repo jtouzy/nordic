@@ -1,6 +1,7 @@
 class QueryBuilder {
-  constructor(tableMetadata) {
+  constructor(tableMetadata, propertiesMapping) {
     this.$tableMetadata = tableMetadata
+    this.$propertiesMapping = propertiesMapping
   }
   getSelectQuery() {
     return {
@@ -38,7 +39,7 @@ class QueryBuilder {
     const allKeys = [... new Set(createdItems.reduce((accumulator, item) => {
       return accumulator.concat(Object.keys(item))
     }, []))]
-    const valuesQuery = createdItems.map((newItem, index) => `(${allKeys.map((k, idx) => `$${ idx + 1 + (allKeys.length*index) }`).join(', ')})`).join(', ')
+    const valuesQuery = createdItems.map((newItem, index) => `(${allKeys.map((k, idx) => this.$usePropertiesMapping(newItem, k, `$${ idx + 1 + (allKeys.length*index) }`)).join(', ')})`).join(', ')
     return {
       text: `INSERT INTO ${this.getTableWithSchemaClause()} (${allKeys.join(', ')}) VALUES ${valuesQuery} RETURNING *`,
       values: createdItems.reduce((accumulator, newItem) => {
@@ -47,8 +48,8 @@ class QueryBuilder {
     }
   }
   getUpdateQuery(updatedValues, conditionsObject) {
-    const updateExpression = this.getConditionsWithObject(updatedValues, ',', false)
-    const conditions = this.getConditionsWithObject(conditionsObject, 'AND', true, updateExpression.values.length)
+    const updateExpression = this.getConditionsWithObject(updatedValues, { updateExpression: true, separator: ',', separatorSpaceBefore: false })
+    const conditions = this.getConditionsWithObject(conditionsObject, { separator: 'AND', separatorSpaceBefore: true, indexOffset: updateExpression.values.length })
     return {
       text: this.$appendWhereConditionIfNeeded(`UPDATE ${this.getTableWithSchemaClause()} SET ${updateExpression.text}`, conditions),
       values: updateExpression.values.concat(conditions.values)
@@ -71,7 +72,16 @@ class QueryBuilder {
     const hasConditions = conditions && conditions.values && conditions.values.length > 0
     return `${query}${hasConditions ? ` WHERE ${conditions.text}` : ''}${appendReturning ? ' RETURNING *' : ''}`
   }
-  getConditionsWithObject(conditionsObject, separator = 'AND', separatorSpaceBefore = true, indexOffset = 0) {
+  $usePropertiesMapping(item, key, value) {
+    if (!this.$propertiesMapping || !this.$propertiesMapping[key]) {
+      return value
+    }
+    return this.$propertiesMapping[key](item, value)
+  }
+  getConditionsWithObject(conditionsObject, options) {
+    const { updateExpression, separator, separatorSpaceBefore, indexOffset } = Object.assign({
+      updateExpression: false, separator: 'AND', separatorSpaceBefore: true, indexOffset: 0
+    }, options)
     const conditionKeys = Object.keys(conditionsObject || {})
     return {
       text: conditionKeys.reduce((accumulator, key) => {
@@ -80,11 +90,11 @@ class QueryBuilder {
         if (Array.isArray(value)) {
           return accumulator.concat([`${key} IN (${value.map(v => {
             nextIndex = nextIndex + 1
-            return `$${nextIndex - 1}`
+            return updateExpression ? this.$usePropertiesMapping(conditionsObject, key, `$${nextIndex - 1}`) : `$${nextIndex - 1}`
           }).join(', ')})`])
         } else {
           nextIndex = nextIndex + 1
-          return accumulator.concat([`${key} = $${nextIndex - 1}`])
+          return accumulator.concat([`${key} = ${updateExpression ? this.$usePropertiesMapping(conditionsObject, key, `$${nextIndex - 1}`) : `$${nextIndex - 1}`}`])
         }
       }, []).join(`${separatorSpaceBefore ? ' ' : ''}${separator} `),
       values: conditionKeys.reduce((accumulator, key) => {
