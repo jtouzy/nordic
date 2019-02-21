@@ -226,7 +226,7 @@ class ProductDao extends Dao {
 
 With custom dao instances, you can customize actions when inserting or updating records. Just provide a properties mapping object to the super constructor, which reference properties to be customized when inserting/updating records.
 
-In the example below, the `tokens` property will be replaced from `$1` to `to_tsvector($1)` on INSERT and UPDATE queries.
+In the example below, the `tokens` property will be replaced from `$1` to `to_tsvector($1)` on INSERT and UPDATE queries.
 
 ```javascript
 class ProductDao extends Dao {
@@ -236,7 +236,7 @@ class ProductDao extends Dao {
   constructor(context) {
     super(context, {
       tokens(item, value) {
-        return `to_tsvector(${value})`
+        return `to_tsvector(${value})`
       }
     })
   }
