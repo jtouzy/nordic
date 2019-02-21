@@ -17,9 +17,10 @@ npm install nordic --save
 Below a quick example of connecting to your database and creating an article in few lines.
 
 ```javascript
-const { nordic } = require('nordic')
+const { Nordic } = require('nordic')
 const credentials = require('myDatabaseSuperSecuredCredentials.json')
 
+const nordic = new Nordic()
 nordic.initialize(credentials)
 const dao = await nordic.getDao('articles')
 const article = await dao.create({ name: 'My super article' })
@@ -28,13 +29,16 @@ await nordic.shutdown()
 
 ## How to start
 
-Simply get the nordic instance.
+Simply get a new nordic instance.
 
 ```javascript
-const { nordic } = require('nordic')
+const { Nordic } = require('nordic')
+const nordic = new Nordic()
 ```
 
-Then, configure the nordic instance with the `initialize` function.
+Each Nordic instance you have will open a DB connection. In many cases, be sure to keep a Nordic singleton to avoid duplicate connections.
+
+In a second time, configure the nordic instance with the `initialize` function.
 
 *Note that this line will only configure the client access to your db. No connection is made at this point.*
 

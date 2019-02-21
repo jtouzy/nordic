@@ -109,5 +109,4 @@ class Nordic {
   }
 }
 
-const instance = new Nordic()
-module.exports = instance
+module.exports = Nordic

@@ -1,13 +1,14 @@
 const { expect } = require('chai')
 const fs = require('fs')
 const path = require('path')
-const nordic = require('../src/nordicInstance')
+const Nordic = require('../src/Nordic')
 const toCamelCase = require('lodash.camelcase')
 const MockedDatabaseProxy = require('./_toolkit/MockedDatabaseProxy')
 
 describe('nordic.$initializeDatabaseMetadata', () => {
   it('Should read metadata file and store it', () => {
     // Given
+    const nordic = new Nordic()
     const metadataPath = path.resolve(__dirname, '_toolkit', 'test-metadata.json')
     const fileContent = fs.readFileSync(metadataPath, 'utf8')
     const jsonMetadata = JSON.parse(fileContent)
@@ -21,6 +22,7 @@ describe('nordic.$initializeDatabaseMetadata', () => {
 describe('nordic.rawQuery', () => {
   it('Should call database proxy with given query, with no parameters', async () => {
     // Given
+    const nordic = new Nordic()
     const mockedDatabaseProxy = new MockedDatabaseProxy()
     nordic.$initializeDataProxy()
     nordic.$databaseProxy = mockedDatabaseProxy
@@ -34,6 +36,7 @@ describe('nordic.rawQuery', () => {
   })
   it('Should call database proxy with given query, with one parameter', async () => {
     // Given
+    const nordic = new Nordic()
     const mockedDatabaseProxy = new MockedDatabaseProxy()
     nordic.$initializeDataProxy()
     nordic.$databaseProxy = mockedDatabaseProxy
@@ -49,6 +52,7 @@ describe('nordic.rawQuery', () => {
   })
   it('Should call database proxy with given query, with multiple parameters', async () => {
     // Given
+    const nordic = new Nordic()
     const mockedDatabaseProxy = new MockedDatabaseProxy()
     nordic.$initializeDataProxy()
     nordic.$databaseProxy = mockedDatabaseProxy
@@ -80,6 +84,7 @@ describe('nordic.rawQuery', () => {
   })*/
   it('Should call database proxy with given query, with array parameters', async () => {
     // Given
+    const nordic = new Nordic()
     const mockedDatabaseProxy = new MockedDatabaseProxy()
     nordic.$initializeDataProxy()
     nordic.$databaseProxy = mockedDatabaseProxy
@@ -95,6 +100,7 @@ describe('nordic.rawQuery', () => {
   })
   it('Should call database proxy with given query, with multiple parameters with arrays', async () => {
     // Given
+    const nordic = new Nordic()
     const mockedDatabaseProxy = new MockedDatabaseProxy()
     nordic.$initializeDataProxy()
     nordic.$databaseProxy = mockedDatabaseProxy
@@ -111,6 +117,7 @@ describe('nordic.rawQuery', () => {
   })
   it('Should get database proxy data and mapping with transform options', async () => {
     // Given
+    const nordic = new Nordic()
     const mockedDatabaseProxy = new MockedDatabaseProxy()
     nordic.$initializeDataProxy({
       databaseToObjectKeyTransform: toCamelCase
