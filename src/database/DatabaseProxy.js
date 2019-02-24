@@ -35,6 +35,9 @@ class DatabaseProxy {
   async queryWithTransaction(query) {
     await this.$connectIfNeeded()
     await this.$startTransactionIfNeeded()
+    if (typeof this.$logger === 'function') {
+      this.$logger(query)
+    }
     return await this.$executeQuery(query)
   }
   async query(query) {
