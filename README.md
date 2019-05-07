@@ -198,6 +198,14 @@ The command line tool will ask you some informations to access your database. Yo
 }
 ```
 
+An other way is available if you don't want to generate a metadata file (if you have those metadata in memory or anything else), you can directly send a metadata object in options, with the `metadata` key. This key is read in first priority, then the metadataPath key is read, and if nothing is configured, nordic will fetch metadata itself.
+
+```javascript
+{
+  metadata: myDatabaseMetadataObject
+}
+```
+
 ### Writing your own dao classes
 
 You can customize your dao instances with your additional functions by overriding Dao class. You must provide an entity() static function to allow nordic to retrieve the linked table.
