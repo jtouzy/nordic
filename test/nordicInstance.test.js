@@ -13,7 +13,18 @@ describe('nordic.$initializeDatabaseMetadata', () => {
     const fileContent = fs.readFileSync(metadataPath, 'utf8')
     const jsonMetadata = JSON.parse(fileContent)
     // When
-    nordic.$initializeDatabaseMetadata(metadataPath)
+    nordic.$initializeDatabaseMetadata(null, metadataPath)
+    // Expect
+    expect(nordic.$databaseMetadata).to.be.eql(jsonMetadata)
+  })
+  it('Should read metadata object and store it', () => {
+    // Given
+    const nordic = new Nordic()
+    const metadataPath = path.resolve(__dirname, '_toolkit', 'test-metadata.json')
+    const fileContent = fs.readFileSync(metadataPath, 'utf8')
+    const jsonMetadata = JSON.parse(fileContent)
+    // When
+    nordic.$initializeDatabaseMetadata(jsonMetadata)
     // Expect
     expect(nordic.$databaseMetadata).to.be.eql(jsonMetadata)
   })
