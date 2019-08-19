@@ -40,11 +40,17 @@ describe('QueryBuilder.getSelectQueryWithConditionsObject', () => {
     expect(select.text).to.be.equal('SELECT * FROM secured.articles AS articles WHERE article_id = $1 AND product_id = $2')
     expect(select.values).to.be.eql([randomData.articleId, randomData.productId])
   })
-  it('Should generate SQL SELECT query with multiple conditions including arrays', () => {
+  it('Should generate SQL SELECT query with multiple conditions including one array', () => {
     const sut = new QueryBuilder({ name: 'articles', schema: 'secured' })
     const select = sut.getSelectQueryWithConditionsObject({ article_id: randomData.articleId, product_id: randomData.productId, reference_id: [randomData.articleId, randomData.productId] })
     expect(select.text).to.be.equal('SELECT * FROM secured.articles AS articles WHERE article_id = $1 AND product_id = $2 AND reference_id IN ($3, $4)')
     expect(select.values).to.be.eql([randomData.articleId, randomData.productId, randomData.articleId, randomData.productId])
+  })
+  it('Should generate SQL SELECT query with multiple conditions including two arrays', () => {
+    const sut = new QueryBuilder({ name: 'articles', schema: 'secured' })
+    const select = sut.getSelectQueryWithConditionsObject({ article_id: randomData.articleId, product_id: randomData.productId, reference_id: [randomData.articleId, randomData.productId], category_id: [randomData.articleId, randomData.productId] })
+    expect(select.text).to.be.equal('SELECT * FROM secured.articles AS articles WHERE article_id = $1 AND product_id = $2 AND reference_id IN ($3, $4) AND category_id IN ($5, $6)')
+    expect(select.values).to.be.eql([randomData.articleId, randomData.productId, randomData.articleId, randomData.productId, randomData.articleId, randomData.productId])
   })
 })
 
@@ -150,6 +156,12 @@ describe('QueryBuilder.getUpdateQuery', () => {
     const update = sut.getUpdateQuery({ title: 'Toto', tokens: 'myToken' })
     expect(update.text).to.be.equal('UPDATE secured.articles SET title = $1, tokens = to_tsvector($2) RETURNING *')
     expect(update.values).to.be.eql(['Toto', 'myToken'])
+  })
+  it('Should generate basic SQL UPDATE query including conditions with two arrays', () => {
+    const sut = new QueryBuilder({ name: 'articles', schema: 'secured' })
+    const update = sut.getUpdateQuery({ title: 'Toto' }, { article_id: randomData.articleId, product_id: randomData.productId, reference_id: [randomData.articleId, randomData.productId], category_id: [randomData.articleId, randomData.productId] })
+    expect(update.text).to.be.equal('UPDATE secured.articles SET title = $1 WHERE article_id = $2 AND product_id = $3 AND reference_id IN ($4, $5) AND category_id IN ($6, $7) RETURNING *')
+    expect(update.values).to.be.eql(['Toto', randomData.articleId, randomData.productId, randomData.articleId, randomData.productId, randomData.articleId, randomData.productId])
   })
 })
 

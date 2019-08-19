@@ -83,9 +83,9 @@ class QueryBuilder {
       updateExpression: false, separator: 'AND', separatorSpaceBefore: true, indexOffset: 0
     }, options)
     const conditionKeys = Object.keys(conditionsObject || {})
+    let nextIndex = indexOffset + 1
     return {
       text: conditionKeys.reduce((accumulator, key) => {
-        let nextIndex = accumulator.length + indexOffset + 1
         const value = conditionsObject[key]
         if (Array.isArray(value)) {
           return accumulator.concat([`${key} IN (${value.map(v => {
