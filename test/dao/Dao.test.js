@@ -14,7 +14,7 @@ describe('Dao.constructor', () => {
 describe('Dao.findAll', () => {
   it('Should send SQL SELECT to database proxy', async () => {
     // Given
-    const dao = DataSetProvider.getDao_withTableMetadata_withNoColumns_withMockedDatabaseProxy()
+    const dao = DataSetProvider.getDao_withTableMetadata_withColumns_withOnePrimaryKey_requiredColumns_withMockedDatabaseProxy()
     const databaseProxy = dao.$databaseProxy
     // When
     await dao.findAll()
@@ -26,7 +26,7 @@ describe('Dao.findAll', () => {
   })
   it('Should return values as transformed objects', async () => {
     // Given
-    const dao = DataSetProvider.getDao_withTableMetadata_withNoColumns_withMockedDatabaseProxy()
+    const dao = DataSetProvider.getDao_withTableMetadata_withColumns_withOnePrimaryKey_requiredColumns_withMockedDatabaseProxy()
     const databaseProxy = dao.$databaseProxy
     // When
     const result = await dao.findAll()
@@ -38,7 +38,7 @@ describe('Dao.findAll', () => {
   })
   it('Should not start a transaction in database', async () => {
     // Given
-    const dao = DataSetProvider.getDao_withTableMetadata_withNoColumns_withMockedDatabaseProxy()
+    const dao = DataSetProvider.getDao_withTableMetadata_withColumns_withOnePrimaryKey_requiredColumns_withMockedDatabaseProxy()
     const databaseProxy = dao.$databaseProxy
     // When
     const result = await dao.findAll()
@@ -50,7 +50,7 @@ describe('Dao.findAll', () => {
 describe('Dao.find', () => {
   it('Should send SQL SELECT to database proxy with no conditions', async () => {
     // Given
-    const dao = DataSetProvider.getDao_withTableMetadata_withNoColumns_withMockedDatabaseProxy()
+    const dao = DataSetProvider.getDao_withTableMetadata_withColumns_withOnePrimaryKey_requiredColumns_withMockedDatabaseProxy()
     const databaseProxy = dao.$databaseProxy
     // When
     await dao.find()
@@ -62,7 +62,7 @@ describe('Dao.find', () => {
   })
   it('Should send SQL SELECT to database proxy with conditions', async () => {
     // Given
-    const dao = DataSetProvider.getDao_withTableMetadata_withNoColumns_withMockedDatabaseProxy()
+    const dao = DataSetProvider.getDao_withTableMetadata_withColumns_withOnePrimaryKey_requiredColumns_withMockedDatabaseProxy()
     const databaseProxy = dao.$databaseProxy
     // When
     await dao.find({ articleId: 1 })
@@ -74,7 +74,7 @@ describe('Dao.find', () => {
   })
   it('Should send SQL SELECT to database proxy with boolean conditions', async () => {
     // Given
-    const dao = DataSetProvider.getDao_withTableMetadata_withNoColumns_withMockedDatabaseProxy()
+    const dao = DataSetProvider.getDao_withTableMetadata_withColumns_withOnePrimaryKey_requiredColumns_withMockedDatabaseProxy()
     const databaseProxy = dao.$databaseProxy
     // When
     await dao.find({ edited: false })
@@ -86,7 +86,7 @@ describe('Dao.find', () => {
   })
   it('Should return values as transformed objects', async () => {
     // Given
-    const dao = DataSetProvider.getDao_withTableMetadata_withNoColumns_withMockedDatabaseProxy()
+    const dao = DataSetProvider.getDao_withTableMetadata_withColumns_withOnePrimaryKey_requiredColumns_withMockedDatabaseProxy()
     const databaseProxy = dao.$databaseProxy
     // When
     const result = await dao.find({ articleId: 1 })
@@ -97,7 +97,7 @@ describe('Dao.find', () => {
   })
   it('Should not start a transaction in database', async () => {
     // Given
-    const dao = DataSetProvider.getDao_withTableMetadata_withNoColumns_withMockedDatabaseProxy()
+    const dao = DataSetProvider.getDao_withTableMetadata_withColumns_withOnePrimaryKey_requiredColumns_withMockedDatabaseProxy()
     const databaseProxy = dao.$databaseProxy
     // When
     const result = await dao.find({ articleId: 1 })
@@ -109,7 +109,7 @@ describe('Dao.find', () => {
 describe('Dao.findOne', () => {
   it('Should send SQL SELECT to database proxy', async () => {
     // Given
-    const dao = DataSetProvider.getDao_withTableMetadata_withNoColumns_withMockedDatabaseProxy()
+    const dao = DataSetProvider.getDao_withTableMetadata_withColumns_withOnePrimaryKey_requiredColumns_withMockedDatabaseProxy()
     const databaseProxy = dao.$databaseProxy
     // When
     await dao.findOne({ articleId: 1 })
@@ -121,7 +121,7 @@ describe('Dao.findOne', () => {
   })
   it('Should return values as transformed objects', async () => {
     // Given
-    const dao = DataSetProvider.getDao_withTableMetadata_withNoColumns_withMockedDatabaseProxy()
+    const dao = DataSetProvider.getDao_withTableMetadata_withColumns_withOnePrimaryKey_requiredColumns_withMockedDatabaseProxy()
     const databaseProxy = dao.$databaseProxy
     // When
     const result = await dao.findOne({ articleId: 1 })
@@ -130,7 +130,7 @@ describe('Dao.findOne', () => {
   })
   it('Should not start a transaction in database', async () => {
     // Given
-    const dao = DataSetProvider.getDao_withTableMetadata_withNoColumns_withMockedDatabaseProxy()
+    const dao = DataSetProvider.getDao_withTableMetadata_withColumns_withOnePrimaryKey_requiredColumns_withMockedDatabaseProxy()
     const databaseProxy = dao.$databaseProxy
     // When
     const result = await dao.findOne({ articleId: 1 })
@@ -142,7 +142,7 @@ describe('Dao.findOne', () => {
 describe('Dao.count', () => {
   it('Should send SQL SELECT to database proxy with no conditions', async () => {
     // Given
-    const dao = DataSetProvider.getDao_withTableMetadata_withNoColumns_withMockedDatabaseProxy()
+    const dao = DataSetProvider.getDao_withTableMetadata_withColumns_withOnePrimaryKey_requiredColumns_withMockedDatabaseProxy()
     const databaseProxy = dao.$databaseProxy
     // When
     await dao.count()
@@ -154,7 +154,7 @@ describe('Dao.count', () => {
   })
   it('Should send SQL SELECT to database proxy with conditions', async () => {
     // Given
-    const dao = DataSetProvider.getDao_withTableMetadata_withNoColumns_withMockedDatabaseProxy()
+    const dao = DataSetProvider.getDao_withTableMetadata_withColumns_withOnePrimaryKey_requiredColumns_withMockedDatabaseProxy()
     const databaseProxy = dao.$databaseProxy
     // When
     await dao.count({ articleId: 1 })
@@ -166,7 +166,7 @@ describe('Dao.count', () => {
   })
   it('Should return values as transformed objects', async () => {
     // Given
-    const dao = DataSetProvider.getDao_withTableMetadata_withNoColumns_withMockedDatabaseProxy()
+    const dao = DataSetProvider.getDao_withTableMetadata_withColumns_withOnePrimaryKey_requiredColumns_withMockedDatabaseProxy()
     const databaseProxy = dao.$databaseProxy
     // When
     const result = await dao.count({ articleId: 1 })
@@ -175,7 +175,7 @@ describe('Dao.count', () => {
   })
   it('Should not start a transaction in database', async () => {
     // Given
-    const dao = DataSetProvider.getDao_withTableMetadata_withNoColumns_withMockedDatabaseProxy()
+    const dao = DataSetProvider.getDao_withTableMetadata_withColumns_withOnePrimaryKey_requiredColumns_withMockedDatabaseProxy()
     const databaseProxy = dao.$databaseProxy
     // When
     const result = await dao.count({ articleId: 1 })
@@ -333,7 +333,7 @@ describe('Dao.$getPrimaryKeyConditionsFromObject', () => {
     // Given
     const dao = DataSetProvider.getDao_withTableMetadata_withColumns_withOnePrimaryKey_requiredColumns()
     // When
-    const result = dao.$getPrimaryKeyConditionsFromObject({ articleId: 1, title: 'Todo' })
+    const result = dao.$getPrimaryKeyConditionsFromObject({ article_id: 1, title: 'Todo' })
     // Expect
     expect(result).to.be.eql({ article_id: 1 })
   })
@@ -341,7 +341,7 @@ describe('Dao.$getPrimaryKeyConditionsFromObject', () => {
     // Given
     const dao = DataSetProvider.getDao_withTableMetadata_withColumns_withTwoPrimaryKeyAndOneRequired()
     // When
-    const result = dao.$getPrimaryKeyConditionsFromObject({ articleId: 1, nonExistingColumn: 'Todo' })
+    const result = dao.$getPrimaryKeyConditionsFromObject({ article_id: 1, nonExistingColumn: 'Todo' })
     // Expect
     expect(result).to.be.eql({ article_id: 1 })
   })
@@ -363,7 +363,7 @@ describe('Dao.$getConditionsObjectFromArgument', () => {
   // TODO add string argument test when implemented
   it('Should convert regular object to database readable object', () => {
     // Given
-    const dao = DataSetProvider.getDao_withTableMetadata_withNoColumns()
+    const dao = DataSetProvider.getDao_withTableMetadata_withColumns_withOnePrimaryKey_requiredColumns()
     // When
     const result = dao.$getConditionsObjectFromArgument({ articleId: 'article113' })
     // Expect
@@ -371,7 +371,7 @@ describe('Dao.$getConditionsObjectFromArgument', () => {
   })
   it('Should not convert database readable object', () => {
     // Given
-    const dao = DataSetProvider.getDao_withTableMetadata_withNoColumns()
+    const dao = DataSetProvider.getDao_withTableMetadata_withColumns_withOnePrimaryKey_requiredColumns()
     // When
     const result = dao.$getConditionsObjectFromArgument({ article_id: 'article113' })
     // Expect
@@ -379,7 +379,7 @@ describe('Dao.$getConditionsObjectFromArgument', () => {
   })
   it('Should convert function argument with regular object as database readable object', () => {
     // Given
-    const dao = DataSetProvider.getDao_withTableMetadata_withNoColumns()
+    const dao = DataSetProvider.getDao_withTableMetadata_withColumns_withOnePrimaryKey_requiredColumns()
     // When
     const result = dao.$getConditionsObjectFromArgument(() => { return { articleId: 'article113' } })
     // Expect
@@ -387,7 +387,7 @@ describe('Dao.$getConditionsObjectFromArgument', () => {
   })
   it('Should convert function argument with database readable object', () => {
     // Given
-    const dao = DataSetProvider.getDao_withTableMetadata_withNoColumns()
+    const dao = DataSetProvider.getDao_withTableMetadata_withColumns_withOnePrimaryKey_requiredColumns()
     // When
     const result = dao.$getConditionsObjectFromArgument(() => { return { article_id: 'article113' } })
     // Expect

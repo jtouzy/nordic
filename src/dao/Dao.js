@@ -38,14 +38,15 @@ class Dao {
     return parseInt(result[0].count)
   }
   async create(objectOrArray) {
-    const convertedObjectOrArray = this.$dataProxy.objectToDatabase(objectOrArray)
+    const convertedObjectOrArray = this.$toDatabaseObject(objectOrArray)
     const query = this.$queryBuilder.getInsertQuery(convertedObjectOrArray)
     const result = await this.$databaseProxy.queryWithTransaction(query)
     return this.$dataProxy.databaseToObject(!Array.isArray(objectOrArray) ? result[0] : result)
   }
   async update(object) {
-    const conditionsObject = this.$getPrimaryKeyConditionsFromObject(object)
-    const updatedValues = this.$getUpdatedValuesFrom(object, conditionsObject, { excludeConditions: true })
+    const convertedObject = this.$toDatabaseObject(object)
+    const conditionsObject = this.$getPrimaryKeyConditionsFromObject(convertedObject)
+    const updatedValues = this.$getUpdatedValuesFrom(convertedObject, conditionsObject, { excludeConditions: true })
     const query = this.$queryBuilder.getUpdateQuery(updatedValues, conditionsObject)
     const result = await this.$databaseProxy.queryWithTransaction(query)
     return this.$dataProxy.databaseToObject(result[0])
@@ -58,7 +59,8 @@ class Dao {
     return this.$dataProxy.databaseToObject(result)
   }
   async delete(object) {
-    const conditionsObject = this.$getPrimaryKeyConditionsFromObject(object)
+    const convertedObject = this.$toDatabaseObject(object)
+    const conditionsObject = this.$getPrimaryKeyConditionsFromObject(convertedObject)
     const query = this.$queryBuilder.getDeleteQuery(conditionsObject)
     const result = await this.$databaseProxy.queryWithTransaction(query)
     return this.$dataProxy.databaseToObject(result[0])
@@ -69,15 +71,27 @@ class Dao {
     const result = await this.$databaseProxy.queryWithTransaction(query)
     return this.$dataProxy.databaseToObject(result)
   }
+  $getOnlyRelatedObjectOrArray(objectOrArray) {
+    if (Array.isArray(objectOrArray)) {
+      return objectOrArray.map(this.$getOnlyRelatedObject)
+    } else {
+      return this.$getOnlyRelatedObject(objectOrArray)
+    }
+  }
+  $getOnlyRelatedObject(object) {
+    const columnIds = (this.$tableMetadata.columns || []).map(c => c.name)
+    return Object.keys(object).filter((k) => columnIds.includes(k)).reduce((accumulator, next) => {
+      return Object.assign(accumulator, { [next]: object[next] })
+    }, {})
+  }
   $getUpdatedValuesFrom(object, conditionsObject, options = { excludeConditions: false }) {
     const { excludeConditions } = options
     const conditionKeys = Object.keys(conditionsObject)
-    const convertedObject = this.$dataProxy.objectToDatabase(object)
-    return Object.keys(convertedObject).reduce((accumulator, key) => {
+    return Object.keys(object).reduce((accumulator, key) => {
       if (excludeConditions && conditionKeys.includes(key)) {
         return accumulator
       } else {
-        return Object.assign(accumulator, { [key]: convertedObject[key] })
+        return Object.assign(accumulator, { [key]: object[key] })
       }
     }, {})
   }
@@ -86,15 +100,14 @@ class Dao {
     if (primaryKeys.length === 0) {
       throw new Error(`No conditions has been given, and no primary keys is registered : can't do update`)
     }
-    const convertedObject = this.$dataProxy.objectToDatabase(object)
     const requiredPrimaryKeyNames = primaryKeys.filter(k => k.required).map(k => k.name)
-    const convertedObjectKeys = Object.keys(convertedObject)
+    const convertedObjectKeys = Object.keys(object)
     const notIncludedInObjectKeys = requiredPrimaryKeyNames.filter(k => !convertedObjectKeys.includes(k))
     if (notIncludedInObjectKeys.length > 0) {
       throw new Error(`Some properties (${notIncludedInObjectKeys.join(',')}) are not included in updated object, but they are required for update`)
     }
     return primaryKeys.reduce((accumulator, key) => {
-      const submittedValue = convertedObject[key.name]
+      const submittedValue = object[key.name]
       if (submittedValue) {
         return Object.assign(accumulator, { [key.name]: submittedValue })
       } else {
@@ -106,12 +119,15 @@ class Dao {
     if (typeof argument === 'string') {
       return { id: argument } // TODO make with metadata columsn
     } else if (typeof argument === 'object') {
-      return this.$dataProxy.objectToDatabase(argument)
+      return this.$toDatabaseObject(argument)
     } else if (typeof argument === 'function') {
-      return this.$dataProxy.objectToDatabase(argument())
+      return this.$toDatabaseObject(argument())
     } else {
       return argument
     }
+  }
+  $toDatabaseObject(object) {
+    return this.$getOnlyRelatedObject(this.$dataProxy.objectToDatabase(object))
   }
 }
 

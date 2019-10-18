@@ -9,6 +9,8 @@ const securedSchema = 'secured'
 const articlesTable = 'articles'
 const articleIdColumnName = 'article_id'
 const articleTitleColumnName = 'title'
+const articleEditionColumnName = 'edited'
+const articleProducersColumnName = 'producers'
 
 class DataSetProvider {
   // ***************************************************************************
@@ -32,7 +34,9 @@ class DataSetProvider {
     return Object.assign(this.getTableMetadata_withNoColumns(), {
       columns: [
         { name: articleIdColumnName, required: true, primaryKey: true },
-        { name: articleTitleColumnName, required: true, primaryKey: false }
+        { name: articleTitleColumnName, required: true, primaryKey: false },
+        { name: articleEditionColumnName, required: false, primaryKey: false },
+        { name: articleProducersColumnName, required: false, primaryKey: false }
       ]
     })
   }
@@ -56,20 +60,6 @@ class DataSetProvider {
   // ***************************************************************************
   // DATA SET - Dao
   // ***************************************************************************
-  static getDao_withTableMetadata_withNoColumns() {
-    return new Dao({
-      tableMetadata: this.getTableMetadata_withNoColumns(),
-      dataProxy: this.getDataProxy_withCamelToSnakeTransform()
-    })
-  }
-  static getDao_withTableMetadata_withNoColumns_withMockedDatabaseProxy() {
-    const mockedDatabaseProxy = new MockedDatabaseProxy()
-    return new Dao({
-      tableMetadata: this.getTableMetadata_withNoColumns(),
-      databaseProxy: mockedDatabaseProxy,
-      dataProxy: this.getDataProxy_withCamelToSnakeTransform()
-    })
-  }
   static getDao_withTableMetadata_withColumns_withNoPrimaryKeys_requiredColumns() {
     return new Dao({
       tableMetadata: this.getTableMetadata_withColumns_withNoPrimaryKeys_requiredColumns(),
