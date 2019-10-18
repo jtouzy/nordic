@@ -1,7 +1,21 @@
 class QueryBuilder {
-  constructor(tableMetadata, propertiesMapping) {
+  constructor(tableMetadata, propertiesMapping, timeStamppedColumns) {
     this.$tableMetadata = tableMetadata
     this.$propertiesMapping = propertiesMapping
+    this.$timeStamppedColumns = timeStamppedColumns
+    this.$initializeDefaultPropertiesMapping()
+  }
+  $initializeDefaultPropertiesMapping() {
+    if (this.$hasTimeStamppedColumnsForInsert() || this.$hasTimeStamppedColumnsForUpdate()) {
+      const propertiesMapping = this.$propertiesMapping || {}
+      if (this.$hasTimeStamppedColumnsForUpdate()) {
+        propertiesMapping[this.$timeStamppedColumns.update] = () => { return 'now()' }
+      }
+      if (this.$hasTimeStamppedColumnsForInsert()) {
+        propertiesMapping[this.$timeStamppedColumns.insert] = () => { return 'now()'}
+      }
+      this.$propertiesMapping = propertiesMapping
+    }
   }
   getSelectQuery() {
     return {
@@ -32,10 +46,11 @@ class QueryBuilder {
     }
   }
   getInsertQuery(createdValues) {
-    const createdItems = Array.isArray(createdValues) ? createdValues : [createdValues]
+    let createdItems = Array.isArray(createdValues) ? createdValues : [createdValues]
     if (createdItems.length === 0) {
       throw new Error(`Trying to insert an empty array.`)
     }
+    createdItems = this.$appendTimeStamppedColumnsForInsert(createdItems)
     const allKeys = [... new Set(createdItems.reduce((accumulator, item) => {
       return accumulator.concat(Object.keys(item))
     }, []))]
@@ -43,11 +58,12 @@ class QueryBuilder {
     return {
       text: `INSERT INTO ${this.getTableWithSchemaClause()} (${allKeys.join(', ')}) VALUES ${valuesQuery} RETURNING *`,
       values: createdItems.reduce((accumulator, newItem) => {
-        return accumulator.concat(allKeys.map(k => typeof newItem[k] === 'undefined' ? null : newItem[k]))
+        return accumulator.concat(this.$filterTimeStamppedColumnsKeysForInsert(allKeys).map(k => typeof newItem[k] === 'undefined' ? null : newItem[k]))
       }, [])
     }
   }
-  getUpdateQuery(updatedValues, conditionsObject) {
+  getUpdateQuery(updated, conditionsObject) {
+    const updatedValues = this.$appendTimeStamppedColumnsForUpdate(updated)
     const updateExpression = this.getConditionsWithObject(updatedValues, { updateExpression: true, separator: ',', separatorSpaceBefore: false })
     const conditions = this.getConditionsWithObject(conditionsObject, { separator: 'AND', separatorSpaceBefore: true, indexOffset: updateExpression.values.length })
     return {
@@ -67,6 +83,36 @@ class QueryBuilder {
   }
   getTableWithSchemaClause() {
     return `${this.$tableMetadata.schema}.${this.$tableMetadata.name}`
+  }
+  $hasTimeStamppedColumnsForInsert() {
+    return typeof this.$timeStamppedColumns === 'object' && this.$timeStamppedColumns.insert
+  }
+  $hasTimeStamppedColumnsForUpdate() {
+    return typeof this.$timeStamppedColumns === 'object' && this.$timeStamppedColumns.update
+  }
+  $filterTimeStamppedColumnsKeysForInsert(itemKeys) {
+    if (!this.$hasTimeStamppedColumnsForInsert()) {
+      return itemKeys
+    }
+    return itemKeys.filter((key) => key !== this.$timeStamppedColumns.insert)
+  }
+  $filterTimeStamppedColumnsKeysForUpdate(itemKeys) {
+    if (!this.$hasTimeStamppedColumnsForUpdate()) {
+      return itemKeys
+    }
+    return itemKeys.filter((key) => key !== this.$timeStamppedColumns.update)
+  }
+  $appendTimeStamppedColumnsForInsert(createdItems) {
+    if (!this.$hasTimeStamppedColumnsForInsert()) {
+      return createdItems
+    }
+    return createdItems.map((item) => Object.assign({}, item, { [this.$timeStamppedColumns.insert]: '$NOW' }))
+  }
+  $appendTimeStamppedColumnsForUpdate(updatedValues) {
+    if (!this.$hasTimeStamppedColumnsForUpdate()) {
+      return updatedValues
+    }
+    return Object.assign({}, updatedValues, { [this.$timeStamppedColumns.update]: '$NOW' })
   }
   $appendWhereConditionIfNeeded(query, conditions, appendReturning = true) {
     const hasConditions = conditions && conditions.values && conditions.values.length > 0
@@ -98,6 +144,9 @@ class QueryBuilder {
         }
       }, []).join(`${separatorSpaceBefore ? ' ' : ''}${separator} `),
       values: conditionKeys.reduce((accumulator, key) => {
+        if (updateExpression && this.$hasTimeStamppedColumnsForUpdate() && key === this.$timeStamppedColumns.update) {
+          return accumulator
+        }
         const value = conditionsObject[key]
         return accumulator.concat(Array.isArray(value) ? value : [value])
       }, [])

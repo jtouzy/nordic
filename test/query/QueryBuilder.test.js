@@ -102,6 +102,18 @@ describe('QueryBuilder.getInsertQuery', () => {
     expect(insert.text).to.be.equal('INSERT INTO secured.articles (title, tokens, reference) VALUES ($1, to_tsvector($2), $3) RETURNING *')
     expect(insert.values).to.be.eql(['Toto', 'myToken', 1])
   })
+  it('Should generate SQL INSERT query with timestampped columns for insert', () => {
+    const sut = new QueryBuilder({ name: 'articles', schema: 'secured' }, null, { insert: 'creation_date' })
+    const insert = sut.getInsertQuery([{ title: 'Toto', tokens: 'myToken', reference: 1 }])
+    expect(insert.text).to.be.equal('INSERT INTO secured.articles (title, tokens, reference, creation_date) VALUES ($1, $2, $3, now()) RETURNING *')
+    expect(insert.values).to.be.eql(['Toto', 'myToken', 1])
+  })
+  it('Should generate SQL INSERT query with properties mapping and timestampped columns for insert', () => {
+    const sut = new QueryBuilder({ name: 'articles', schema: 'secured' }, { tokens(item, value) { return `to_tsvector(${value})` } }, { insert: 'creation_date' })
+    const insert = sut.getInsertQuery([{ title: 'Toto', tokens: 'myToken', reference: 1 }])
+    expect(insert.text).to.be.equal('INSERT INTO secured.articles (title, tokens, reference, creation_date) VALUES ($1, to_tsvector($2), $3, now()) RETURNING *')
+    expect(insert.values).to.be.eql(['Toto', 'myToken', 1])
+  })
   it('Should generate SQL INSERT query with multiple inserted values (2)', () => {
     const sut = new QueryBuilder({ name: 'articles', schema: 'secured' })
     const insert = sut.getInsertQuery([{ title: 'Toto', reference: 1 }, { title: 'Titi', reference: 2 }])
@@ -157,6 +169,18 @@ describe('QueryBuilder.getUpdateQuery', () => {
     const sut = new QueryBuilder({ name: 'articles', schema: 'secured' }, { tokens(item, value) { return `to_tsvector(${value})` } })
     const update = sut.getUpdateQuery({ title: 'Toto', tokens: 'myToken' })
     expect(update.text).to.be.equal('UPDATE secured.articles SET title = $1, tokens = to_tsvector($2) RETURNING *')
+    expect(update.values).to.be.eql(['Toto', 'myToken'])
+  })
+  it('Should generate SQL UPDATE query with timestampped columns for update', () => {
+    const sut = new QueryBuilder({ name: 'articles', schema: 'secured' }, null, { update: 'updated_date' })
+    const update = sut.getUpdateQuery({ title: 'Toto', tokens: 'myToken' })
+    expect(update.text).to.be.equal('UPDATE secured.articles SET title = $1, tokens = $2, updated_date = now() RETURNING *')
+    expect(update.values).to.be.eql(['Toto', 'myToken'])
+  })
+  it('Should generate SQL UPDATE query with properties mapping and timestampped columns for update', () => {
+    const sut = new QueryBuilder({ name: 'articles', schema: 'secured' }, { tokens(item, value) { return `to_tsvector(${value})` } }, { update: 'updated_date' })
+    const update = sut.getUpdateQuery({ title: 'Toto', tokens: 'myToken' })
+    expect(update.text).to.be.equal('UPDATE secured.articles SET title = $1, tokens = to_tsvector($2), updated_date = now() RETURNING *')
     expect(update.values).to.be.eql(['Toto', 'myToken'])
   })
   it('Should generate basic SQL UPDATE query including conditions with two arrays', () => {
