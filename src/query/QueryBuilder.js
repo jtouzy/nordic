@@ -58,7 +58,7 @@ class QueryBuilder {
     return {
       text: `INSERT INTO ${this.getTableWithSchemaClause()} (${allKeys.join(', ')}) VALUES ${valuesQuery} RETURNING *`,
       values: createdItems.reduce((accumulator, newItem) => {
-        return accumulator.concat(this.$filterTimeStamppedColumnsKeysForInsert(allKeys).map(k => typeof newItem[k] === 'undefined' ? null : newItem[k]))
+        return accumulator.concat(this.$filterTimeStamppedColumnsKeysForInsert(allKeys).map(k => { return this.$switchUndefinedValue(newItem[k]) }))
       }, [])
     }
   }
@@ -124,6 +124,9 @@ class QueryBuilder {
     }
     return this.$propertiesMapping[key](item, value)
   }
+  $switchUndefinedValue(value) {
+    return typeof value === 'undefined' ? null : value
+  }
   getConditionsWithObject(conditionsObject, options) {
     const { updateExpression, separator, separatorSpaceBefore, indexOffset } = Object.assign({
       updateExpression: false, separator: 'AND', separatorSpaceBefore: true, indexOffset: 0
@@ -148,7 +151,7 @@ class QueryBuilder {
           return accumulator
         }
         const value = conditionsObject[key]
-        return accumulator.concat(Array.isArray(value) ? value : [value])
+        return accumulator.concat(Array.isArray(value) ? value : [this.$switchUndefinedValue(value)])
       }, [])
     }
   }
