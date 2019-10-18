@@ -230,7 +230,7 @@ class ProductDao extends Dao {
 }
 ```
 
-#### Properties propertiesMapping
+#### Properties mapping
 
 With custom dao instances, you can customize actions when inserting or updating records. Just provide a properties mapping object to the super constructor, which reference properties to be customized when inserting/updating records.
 
@@ -243,8 +243,33 @@ class ProductDao extends Dao {
   }
   constructor(context) {
     super(context, {
-      tokens(item, value) {
-        return `to_tsvector(${value})`
+      propertiesMapping: {
+        tokens(item, value) {
+          return `to_tsvector(${value})`
+        }
+      }
+    })
+  }
+  // Add your own functions here...
+}
+```
+
+#### Time stampped columns
+
+With custom dao instances, you can customize INSERT or UPDATE time stampped columns which will be automatically added to your INSERT/UPDATE queries (calling the PostgreSQL `now()` function to get the value). It allows you to have columns like `creation_date` or `update_date` managed automatically.
+
+In the example below, the `creation_date` property and the `update_date` will be added in each INSERT and UPDATE queries on a product item.
+
+```javascript
+class ProductDao extends Dao {
+  static entity() {
+    return 'products'
+  }
+  constructor(context) {
+    super(context, {
+      timeStamppedColumns: {
+        insert: 'creation_date',
+        update: 'update_date'
       }
     })
   }
