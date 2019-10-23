@@ -1,10 +1,12 @@
 const { Client } = require('pg')
+const DatabaseToJavascriptTranslator = require('./DatabaseToJavascriptTranslator')
 
 class DatabaseProxy {
-  constructor({ host, port, database, user, password, options }) {
+  constructor({ host, port, database, user, password, metadata, options }) {
     this.$pgClient = new Client({ host, port, database, user, password })
     this.$isConnected = false
     this.$isTransactionInProgress = false
+    this.$translator = new DatabaseToJavascriptTranslator({ metadata })
     this.$logger = (options || {}).logger
   }
   async $connectIfNeeded() {
@@ -30,7 +32,10 @@ class DatabaseProxy {
   }
   async $executeQuery(query) {
     const result = await this.$pgClient.query(query)
-    return result.rows
+    return this.$translator.translate(result)
+  }
+  setMetadata(metadata) {
+    this.$translator.setMetadata(metadata)
   }
   async queryWithTransaction(query) {
     await this.$connectIfNeeded()

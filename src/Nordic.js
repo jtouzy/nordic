@@ -8,9 +8,11 @@ const EntityContextFactory = require('./dao/EntityContextFactory')
 class Nordic {
   initialize({ host, port, database, user, password, options }) {
     const { transform, metadata, metadataPath, logger } = (options || {})
-    this.$databaseProxy = new DatabaseProxy({ host, port, database, user, password, options: { logger } })
     this.$initializeDataProxy(transform)
     this.$initializeDatabaseMetadata(metadata, metadataPath)
+    this.$databaseProxy = new DatabaseProxy({ 
+      host, port, database, user, password, metadata: this.$databaseMetadata, options: { logger }
+    })
   }
   $initializeDataProxy(transformOptions) {
     this.$dataProxy = new DataProxy(transformOptions)
@@ -38,6 +40,7 @@ class Nordic {
     }
   }
   async rawQuery(text, values) {
+    await this.getDatabaseMetadata()
     const queryValues = (values || {})
     const valuesKeys = Object.keys(queryValues)
     let nextIndex = 1
@@ -65,10 +68,10 @@ class Nordic {
   }
   async getTableMetadata({ schema, table }) {
     const databaseMetadata = await this.getDatabaseMetadata()
-    if (!Object.keys(databaseMetadata).find(s => s === schema)) {
+    if (!Object.keys(databaseMetadata.schemas).find(s => s === schema)) {
       throw new Error(`Missing schema '${schema}' in database metadata.`)
     }
-    const tableMd = databaseMetadata[schema].find(t => t.name === table)
+    const tableMd = databaseMetadata.schemas[schema].find(t => t.name === table)
     if (!tableMd) {
       throw new Error(`Missing table '${table}' in '${schema}' schema metadata.`)
     }
@@ -79,7 +82,8 @@ class Nordic {
       const databaseMetadataProxy = new DatabaseMetadataProxy(this.$databaseProxy)
       const tables = await databaseMetadataProxy.findTables()
       const tableColumns = await databaseMetadataProxy.findColumnsOfTables(tables)
-      this.$databaseMetadata = tables.reduce((accumulator, table) => {
+      const dataTypes = {}
+      const schemas = tables.reduce((accumulator, table) => {
         return Object.assign(accumulator, {
           [table.table_schema]: (accumulator[table.table_schema] || []).concat([{
             name: table.table_name,
@@ -87,16 +91,21 @@ class Nordic {
             columns: tableColumns.filter(c => {
               return c.table_schema === table.table_schema && c.table_name === table.table_name
             }).map(c => {
+              dataTypes[c.data_type_id] = c.data_type
               return {
                 name: c.column_name,
                 required: c.is_nullable !== 'YES',
                 primaryKey: c.is_primary,
-                dataType: c.data_type
+                dataType: c.data_type,
+                dataTypeId: c.data_type_id,
+                dataTypeAlias: c.data_type_alias
               }
             })
           }])
         })
       }, {})
+      this.$databaseMetadata = { schemas, dataTypes }
+      this.$databaseProxy.setMetadata(this.$databaseMetadata)
     }
     return this.$databaseMetadata
   }

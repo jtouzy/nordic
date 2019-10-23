@@ -40,6 +40,7 @@ describe('nordic.rawQuery', () => {
     // When
     await nordic.rawQuery('SELECT * FROM articles')
     // Expect
+    expect(mockedDatabaseProxy.$loadMetadataQueryIsCalled).to.be.true
     expect(mockedDatabaseProxy.$queries).to.be.eql([{
       text: 'SELECT * FROM articles',
       values: []
@@ -56,6 +57,7 @@ describe('nordic.rawQuery', () => {
       id: 1
     })
     // Expect
+    expect(mockedDatabaseProxy.$loadMetadataQueryIsCalled).to.be.true
     expect(mockedDatabaseProxy.$queries).to.be.eql([{
       text: 'SELECT * FROM articles WHERE article_id = $1',
       values: [1]
@@ -73,6 +75,7 @@ describe('nordic.rawQuery', () => {
       title: 'Title of article'
     })
     // Expect
+    expect(mockedDatabaseProxy.$loadMetadataQueryIsCalled).to.be.true
     expect(mockedDatabaseProxy.$queries).to.be.eql([{
       text: 'SELECT * FROM articles WHERE article_id = $1 AND article_title = $2',
       values: [1, 'Title of article']
@@ -104,6 +107,7 @@ describe('nordic.rawQuery', () => {
       title: ['Title of article', 'Title of article 2']
     })
     // Expect
+    expect(mockedDatabaseProxy.$loadMetadataQueryIsCalled).to.be.true
     expect(mockedDatabaseProxy.$queries).to.be.eql([{
       text: 'SELECT * FROM articles WHERE article_title IN ($1, $2)',
       values: ['Title of article', 'Title of article 2']
@@ -121,6 +125,7 @@ describe('nordic.rawQuery', () => {
       title: ['Title of article', 'Title of article 2']
     })
     // Expect
+    expect(mockedDatabaseProxy.$loadMetadataQueryIsCalled).to.be.true
     expect(mockedDatabaseProxy.$queries).to.be.eql([{
       text: 'SELECT * FROM articles WHERE article_id = $1 AND article_title IN ($2, $3)',
       values: [1, 'Title of article', 'Title of article 2']
@@ -139,6 +144,7 @@ describe('nordic.rawQuery', () => {
       id: 1
     })
     // Expect
+    expect(mockedDatabaseProxy.$loadMetadataQueryIsCalled).to.be.true
     expect(result).to.be.eql([{ articleId: 1, title: 'article1' }])
   })
 })
