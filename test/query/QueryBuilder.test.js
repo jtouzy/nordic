@@ -144,6 +144,12 @@ describe('QueryBuilder.getInsertQuery', () => {
     expect(insert.text).to.be.equal('INSERT INTO secured.articles (title, reference, tokens) VALUES ($1, $2, to_tsvector($3)), ($4, $5, to_tsvector($6)) RETURNING *')
     expect(insert.values).to.be.eql(['Toto', 1, 'myToken', 'Titi', 2, 'myToken2'])
   })
+  it('Should generate SQL INSERT query with multiple inserted values, and properties mapping, and timestampped columns', () => {
+    const sut = new QueryBuilder({ name: 'articles', schema: 'secured' }, { tokens(item, value) { return `to_tsvector(${value})` } }, { insert: 'creation_date' })
+    const insert = sut.getInsertQuery([{ title: 'Toto', reference: 1, tokens: 'myToken' }, { title: 'Titi', reference: 2, tokens: 'myToken2' }])
+    expect(insert.text).to.be.equal('INSERT INTO secured.articles (title, reference, tokens, creation_date) VALUES ($1, $2, to_tsvector($3), now()), ($4, $5, to_tsvector($6), now()) RETURNING *')
+    expect(insert.values).to.be.eql(['Toto', 1, 'myToken', 'Titi', 2, 'myToken2'])
+  })
 })
 
 describe('QueryBuilder.getUpdateQuery', () => {

@@ -54,11 +54,12 @@ class QueryBuilder {
     const allKeys = [... new Set(createdItems.reduce((accumulator, item) => {
       return accumulator.concat(Object.keys(item))
     }, []))]
-    const valuesQuery = createdItems.map((newItem, index) => `(${allKeys.map((k, idx) => this.$usePropertiesMapping(newItem, k, `$${ idx + 1 + (allKeys.length*index) }`)).join(', ')})`).join(', ')
+    const filteredKeys = this.$filterTimeStamppedColumnsKeysForInsert(allKeys)
+    const valuesQuery = createdItems.map((newItem, index) => `(${allKeys.map((k, idx) => this.$usePropertiesMapping(newItem, k, `$${ idx + 1 + (filteredKeys.length*index) }`)).join(', ')})`).join(', ')
     return {
       text: `INSERT INTO ${this.getTableWithSchemaClause()} (${allKeys.join(', ')}) VALUES ${valuesQuery} RETURNING *`,
       values: createdItems.reduce((accumulator, newItem) => {
-        return accumulator.concat(this.$filterTimeStamppedColumnsKeysForInsert(allKeys).map(k => { return this.$switchUndefinedValue(newItem[k]) }))
+        return accumulator.concat(filteredKeys.map(k => { return this.$switchUndefinedValue(newItem[k]) }))
       }, [])
     }
   }

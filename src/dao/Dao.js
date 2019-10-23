@@ -73,7 +73,7 @@ class Dao {
   }
   $getOnlyRelatedObjectOrArray(objectOrArray) {
     if (Array.isArray(objectOrArray)) {
-      return objectOrArray.map(this.$getOnlyRelatedObject)
+      return objectOrArray.map((object) => this.$getOnlyRelatedObject(object))
     } else {
       return this.$getOnlyRelatedObject(objectOrArray)
     }
@@ -126,8 +126,12 @@ class Dao {
       return argument
     }
   }
-  $toDatabaseObject(object) {
-    return this.$getOnlyRelatedObject(this.$dataProxy.objectToDatabase(object))
+  $toDatabaseObject(objectOrArray) {
+    return this.$getOnlyRelatedObjectOrArray(
+      Array.isArray(objectOrArray) ? 
+        objectOrArray.map((object) => this.$dataProxy.objectToDatabase(object)) : 
+        this.$dataProxy.objectToDatabase(objectOrArray)
+    )
   }
 }
 
