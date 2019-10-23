@@ -242,13 +242,13 @@ class ProductDao extends Dao {
     return 'products'
   }
   constructor(context) {
-    super(context, {
+    super(Object.assign(context, {
       propertiesMapping: {
         tokens(item, value) {
           return `to_tsvector(${value})`
         }
       }
-    })
+    }))
   }
   // Add your own functions here...
 }
@@ -266,12 +266,12 @@ class ProductDao extends Dao {
     return 'products'
   }
   constructor(context) {
-    super(context, {
+    super(Object.assign(context, {
       timeStamppedColumns: {
         insert: 'creation_date',
         update: 'update_date'
       }
-    })
+    }))
   }
   // Add your own functions here...
 }
