@@ -254,9 +254,9 @@ class ProductDao extends Dao {
 }
 ```
 
-#### Time stampped columns
+#### Time stamped columns
 
-With custom dao instances, you can customize INSERT or UPDATE time stampped columns which will be automatically added to your INSERT/UPDATE queries (calling the PostgreSQL `now()` function to get the value). It allows you to have columns like `creation_date` or `update_date` managed automatically.
+With custom dao instances, you can customize INSERT or UPDATE time stamped columns which will be automatically added to your INSERT/UPDATE queries (calling the PostgreSQL `now()` function to get the value). It allows you to have columns like `creation_date` or `update_date` managed automatically.
 
 In the example below, the `creation_date` property and the `update_date` will be added in each INSERT and UPDATE queries on a product item.
 
@@ -267,7 +267,7 @@ class ProductDao extends Dao {
   }
   constructor(context) {
     super(Object.assign(context, {
-      timeStamppedColumns: {
+      timeStampedColumns: {
         insert: 'creation_date',
         update: 'update_date'
       }

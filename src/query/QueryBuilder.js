@@ -1,18 +1,18 @@
 class QueryBuilder {
-  constructor(tableMetadata, propertiesMapping, timeStamppedColumns) {
+  constructor(tableMetadata, propertiesMapping, timeStampedColumns) {
     this.$tableMetadata = tableMetadata
     this.$propertiesMapping = propertiesMapping
-    this.$timeStamppedColumns = timeStamppedColumns
+    this.$timeStampedColumns = timeStampedColumns
     this.$initializeDefaultPropertiesMapping()
   }
   $initializeDefaultPropertiesMapping() {
-    if (this.$hasTimeStamppedColumnsForInsert() || this.$hasTimeStamppedColumnsForUpdate()) {
+    if (this.$hasTimeStampedColumnsForInsert() || this.$hasTimeStampedColumnsForUpdate()) {
       const propertiesMapping = this.$propertiesMapping || {}
-      if (this.$hasTimeStamppedColumnsForUpdate()) {
-        propertiesMapping[this.$timeStamppedColumns.update] = () => { return 'now()' }
+      if (this.$hasTimeStampedColumnsForUpdate()) {
+        propertiesMapping[this.$timeStampedColumns.update] = () => { return 'now()' }
       }
-      if (this.$hasTimeStamppedColumnsForInsert()) {
-        propertiesMapping[this.$timeStamppedColumns.insert] = () => { return 'now()'}
+      if (this.$hasTimeStampedColumnsForInsert()) {
+        propertiesMapping[this.$timeStampedColumns.insert] = () => { return 'now()'}
       }
       this.$propertiesMapping = propertiesMapping
     }
@@ -50,11 +50,11 @@ class QueryBuilder {
     if (createdItems.length === 0) {
       throw new Error(`Trying to insert an empty array.`)
     }
-    createdItems = this.$appendTimeStamppedColumnsForInsert(createdItems)
+    createdItems = this.$appendTimeStampedColumnsForInsert(createdItems)
     const allKeys = [... new Set(createdItems.reduce((accumulator, item) => {
       return accumulator.concat(Object.keys(item))
     }, []))]
-    const filteredKeys = this.$filterTimeStamppedColumnsKeysForInsert(allKeys)
+    const filteredKeys = this.$filterTimeStampedColumnsKeysForInsert(allKeys)
     const valuesQuery = createdItems.map((newItem, index) => `(${allKeys.map((k, idx) => this.$usePropertiesMapping(newItem, k, `$${ idx + 1 + (filteredKeys.length*index) }`)).join(', ')})`).join(', ')
     return {
       text: `INSERT INTO ${this.getTableWithSchemaClause()} (${allKeys.join(', ')}) VALUES ${valuesQuery} RETURNING *`,
@@ -64,7 +64,7 @@ class QueryBuilder {
     }
   }
   getUpdateQuery(updated, conditionsObject) {
-    const updatedValues = this.$appendTimeStamppedColumnsForUpdate(updated)
+    const updatedValues = this.$appendTimeStampedColumnsForUpdate(updated)
     const updateExpression = this.getConditionsWithObject(updatedValues, { updateExpression: true, separator: ',', separatorSpaceBefore: false })
     const conditions = this.getConditionsWithObject(conditionsObject, { separator: 'AND', separatorSpaceBefore: true, indexOffset: updateExpression.values.length })
     return {
@@ -85,35 +85,35 @@ class QueryBuilder {
   getTableWithSchemaClause() {
     return `${this.$tableMetadata.schema}.${this.$tableMetadata.name}`
   }
-  $hasTimeStamppedColumnsForInsert() {
-    return typeof this.$timeStamppedColumns === 'object' && this.$timeStamppedColumns.insert
+  $hasTimeStampedColumnsForInsert() {
+    return typeof this.$timeStampedColumns === 'object' && this.$timeStampedColumns.insert
   }
-  $hasTimeStamppedColumnsForUpdate() {
-    return typeof this.$timeStamppedColumns === 'object' && this.$timeStamppedColumns.update
+  $hasTimeStampedColumnsForUpdate() {
+    return typeof this.$timeStampedColumns === 'object' && this.$timeStampedColumns.update
   }
-  $filterTimeStamppedColumnsKeysForInsert(itemKeys) {
-    if (!this.$hasTimeStamppedColumnsForInsert()) {
+  $filterTimeStampedColumnsKeysForInsert(itemKeys) {
+    if (!this.$hasTimeStampedColumnsForInsert()) {
       return itemKeys
     }
-    return itemKeys.filter((key) => key !== this.$timeStamppedColumns.insert)
+    return itemKeys.filter((key) => key !== this.$timeStampedColumns.insert)
   }
-  $filterTimeStamppedColumnsKeysForUpdate(itemKeys) {
-    if (!this.$hasTimeStamppedColumnsForUpdate()) {
+  $filterTimeStampedColumnsKeysForUpdate(itemKeys) {
+    if (!this.$hasTimeStampedColumnsForUpdate()) {
       return itemKeys
     }
-    return itemKeys.filter((key) => key !== this.$timeStamppedColumns.update)
+    return itemKeys.filter((key) => key !== this.$timeStampedColumns.update)
   }
-  $appendTimeStamppedColumnsForInsert(createdItems) {
-    if (!this.$hasTimeStamppedColumnsForInsert()) {
+  $appendTimeStampedColumnsForInsert(createdItems) {
+    if (!this.$hasTimeStampedColumnsForInsert()) {
       return createdItems
     }
-    return createdItems.map((item) => Object.assign({}, item, { [this.$timeStamppedColumns.insert]: '$NOW' }))
+    return createdItems.map((item) => Object.assign({}, item, { [this.$timeStampedColumns.insert]: '$NOW' }))
   }
-  $appendTimeStamppedColumnsForUpdate(updatedValues) {
-    if (!this.$hasTimeStamppedColumnsForUpdate()) {
+  $appendTimeStampedColumnsForUpdate(updatedValues) {
+    if (!this.$hasTimeStampedColumnsForUpdate()) {
       return updatedValues
     }
-    return Object.assign({}, updatedValues, { [this.$timeStamppedColumns.update]: '$NOW' })
+    return Object.assign({}, updatedValues, { [this.$timeStampedColumns.update]: '$NOW' })
   }
   $appendWhereConditionIfNeeded(query, conditions, appendReturning = true) {
     const hasConditions = conditions && conditions.values && conditions.values.length > 0
@@ -148,7 +148,7 @@ class QueryBuilder {
         }
       }, []).join(`${separatorSpaceBefore ? ' ' : ''}${separator} `),
       values: conditionKeys.reduce((accumulator, key) => {
-        if (updateExpression && this.$hasTimeStamppedColumnsForUpdate() && key === this.$timeStamppedColumns.update) {
+        if (updateExpression && this.$hasTimeStampedColumnsForUpdate() && key === this.$timeStampedColumns.update) {
           return accumulator
         }
         const value = conditionsObject[key]
