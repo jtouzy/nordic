@@ -195,6 +195,12 @@ describe('QueryBuilder.getUpdateQuery', () => {
     expect(update.text).to.be.equal('UPDATE secured.articles SET title = $1 RETURNING *')
     expect(update.values).to.be.eql([null])
   })
+  it('Should generate SQL UPDATE query with array values', () => {
+    const sut = new QueryBuilder({ name: 'articles', schema: 'secured' })
+    const update = sut.getUpdateQuery({ title: 'Toto', producers: ['Henry', 'McGill'] })
+    expect(update.text).to.be.equal('UPDATE secured.articles SET title = $1, producers = $2 RETURNING *')
+    expect(update.values).to.be.eql(['Toto', ['Henry', 'McGill']])
+  })
   it('Should generate SQL UPDATE query with properties mapping', () => {
     const sut = new QueryBuilder({ name: 'articles', schema: 'secured' }, { tokens(item, value) { return `to_tsvector(${value})` } })
     const update = sut.getUpdateQuery({ title: 'Toto', tokens: 'myToken' })

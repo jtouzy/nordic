@@ -150,7 +150,7 @@ class QueryBuilder {
     let nextIndex = indexOffset + 1, conditions = [], values = []
     for (const key of conditionKeys) {
       const itemValueForKey = conditionsObject[key]
-      if (Array.isArray(itemValueForKey)) {
+      if (Array.isArray(itemValueForKey) && updateExpression === false) {
         const inClause = itemValueForKey.map((itemValueForKeyArrayItem) => {
           const valueKey = `$${nextIndex}`
           const { index: calculatedIndex, value: queryItem } = this.$usePropertiesMapping(conditionsObject, itemValueForKeyArrayItem, key, valueKey, 'UPDATE', values, nextIndex)
