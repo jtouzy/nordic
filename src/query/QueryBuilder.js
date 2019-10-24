@@ -59,13 +59,22 @@ class QueryBuilder {
     const allKeys = [... new Set(createdItems.reduce((accumulator, item) => {
       return accumulator.concat(Object.keys(item))
     }, []))]
-    const filteredKeys = this.$filterTimeStampedColumnsKeysForInsert(allKeys)
-    const valuesQuery = createdItems.map((newItem, index) => `(${allKeys.map((k, idx) => this.$usePropertiesMapping(newItem, k, `$${ idx + 1 + (filteredKeys.length*index) }`, 'INSERT')).join(', ')})`).join(', ')
+    let currentIndex = 1, values = [], valuesQuery = []  
+    for (const rowItem of createdItems) {
+      const rowValuesQuery = []
+      for (const key of allKeys) {
+        const rowItemValueForKey = rowItem[key]
+        const valueKey = `$${currentIndex}`
+        const { index: nextIndex, value: valuesQueryItem } = this.$usePropertiesMapping(rowItem, rowItemValueForKey, key, valueKey, 'INSERT', values, currentIndex)
+        rowValuesQuery.push(valuesQueryItem)
+        currentIndex = nextIndex
+      }
+      valuesQuery.push(rowValuesQuery)
+    }
+    valuesQuery = valuesQuery.map((rowValues) => `(${rowValues.join(', ')})`).join(', ')
     return {
       text: `INSERT INTO ${this.getTableWithSchemaClause()} (${allKeys.join(', ')}) VALUES ${valuesQuery} RETURNING *`,
-      values: createdItems.reduce((accumulator, newItem) => {
-        return accumulator.concat(filteredKeys.map(k => { return this.$switchUndefinedValue(newItem[k]) }))
-      }, [])
+      values
     }
   }
   getUpdateQuery(updated, conditionsObject) {
@@ -96,18 +105,6 @@ class QueryBuilder {
   $hasTimeStampedColumnsForUpdate() {
     return typeof this.$timeStampedColumns === 'object' && this.$timeStampedColumns.update
   }
-  $filterTimeStampedColumnsKeysForInsert(itemKeys) {
-    if (!this.$hasTimeStampedColumnsForInsert()) {
-      return itemKeys
-    }
-    return itemKeys.filter((key) => key !== this.$timeStampedColumns.insert)
-  }
-  $filterTimeStampedColumnsKeysForUpdate(itemKeys) {
-    if (!this.$hasTimeStampedColumnsForUpdate()) {
-      return itemKeys
-    }
-    return itemKeys.filter((key) => key !== this.$timeStampedColumns.update)
-  }
   $appendTimeStampedColumnsForInsert(createdItems) {
     if (!this.$hasTimeStampedColumnsForInsert()) {
       return createdItems
@@ -129,11 +126,18 @@ class QueryBuilder {
     const hasConditions = conditions && conditions.values && conditions.values.length > 0
     return `${query}${hasConditions ? ` WHERE ${conditions.text}` : ''}${appendReturning ? ' RETURNING *' : ''}`
   }
-  $usePropertiesMapping(item, key, value, operation) {
+  $usePropertiesMapping(item, valueForKey, key, value, operation, valuesArray, currentIndex) {
+    let returnValue, newIndex = currentIndex
     if (!this.$propertiesMapping || !this.$propertiesMapping[key]) {
-      return value
+      returnValue = value
+    } else {
+      returnValue = this.$propertiesMapping[key](item, value, operation)
     }
-    return this.$propertiesMapping[key](item, value, operation)
+    if (returnValue.includes(value)) {
+      valuesArray.push(this.$switchUndefinedValue(valueForKey))
+      newIndex = currentIndex + 1
+    }
+    return { index: newIndex, value: returnValue }
   }
   $switchUndefinedValue(value) {
     return typeof value === 'undefined' ? null : value
@@ -143,27 +147,27 @@ class QueryBuilder {
       updateExpression: false, separator: 'AND', separatorSpaceBefore: true, indexOffset: 0
     }, options)
     const conditionKeys = Object.keys(conditionsObject || {})
-    let nextIndex = indexOffset + 1
+    let nextIndex = indexOffset + 1, conditions = [], values = []
+    for (const key of conditionKeys) {
+      const itemValueForKey = conditionsObject[key]
+      if (Array.isArray(itemValueForKey)) {
+        const inClause = itemValueForKey.map((itemValueForKeyArrayItem) => {
+          const valueKey = `$${nextIndex}`
+          const { index: calculatedIndex, value: queryItem } = this.$usePropertiesMapping(conditionsObject, itemValueForKeyArrayItem, key, valueKey, 'UPDATE', values, nextIndex)
+          nextIndex = calculatedIndex
+          return `${updateExpression ? queryItem : valueKey}`
+        }).join(', ')
+        conditions.push(`${key} IN (${inClause})`)
+      } else {
+        const valueKey = `$${nextIndex}`
+        const { index: calculatedIndex, value: queryItem } = this.$usePropertiesMapping(conditionsObject, itemValueForKey, key, valueKey, 'UPDATE', values, nextIndex)
+        nextIndex = calculatedIndex
+        conditions.push(`${key} = ${updateExpression ? queryItem : valueKey}`)
+      } 
+    }
     return {
-      text: conditionKeys.reduce((accumulator, key) => {
-        const value = conditionsObject[key]
-        if (Array.isArray(value)) {
-          return accumulator.concat([`${key} IN (${value.map(v => {
-            nextIndex = nextIndex + 1
-            return updateExpression ? this.$usePropertiesMapping(conditionsObject, key, `$${nextIndex - 1}`, 'UPDATE') : `$${nextIndex - 1}`
-          }).join(', ')})`])
-        } else {
-          nextIndex = nextIndex + 1
-          return accumulator.concat([`${key} = ${updateExpression ? this.$usePropertiesMapping(conditionsObject, key, `$${nextIndex - 1}`, 'UPDATE') : `$${nextIndex - 1}`}`])
-        }
-      }, []).join(`${separatorSpaceBefore ? ' ' : ''}${separator} `),
-      values: conditionKeys.reduce((accumulator, key) => {
-        if (updateExpression && this.$hasTimeStampedColumnsForUpdate() && key === this.$timeStampedColumns.update) {
-          return accumulator
-        }
-        const value = conditionsObject[key]
-        return accumulator.concat(Array.isArray(value) ? value : [this.$switchUndefinedValue(value)])
-      }, [])
+      text: conditions.join(`${separatorSpaceBefore ? ' ' : ''}${separator} `),
+      values
     }
   }
 }

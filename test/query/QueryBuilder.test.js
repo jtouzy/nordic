@@ -108,6 +108,12 @@ describe('QueryBuilder.getInsertQuery', () => {
     expect(insert.text).to.be.equal('INSERT INTO secured.articles (title, tokens, reference, creation_date) VALUES ($1, $2, $3, now()) RETURNING *')
     expect(insert.values).to.be.eql(['Toto', 'myToken', 1])
   })
+  it('Should generate SQL INSERT query with timestamped columns for insert without base order', () => {
+    const sut = new QueryBuilder({ name: 'articles', schema: 'secured' }, null, { insert: 'creation_date' })
+    const insert = sut.getInsertQuery([{ title: 'Toto', creation_date: 'value', tokens: 'myToken', reference: 1 }])
+    expect(insert.text).to.be.equal('INSERT INTO secured.articles (title, creation_date, tokens, reference) VALUES ($1, now(), $2, $3) RETURNING *')
+    expect(insert.values).to.be.eql(['Toto', 'myToken', 1])
+  })
   it('Should generate SQL INSERT query with timestamped columns for insert and update', () => {
     const sut = new QueryBuilder({ name: 'articles', schema: 'secured' }, null, { insert: 'creation_date', update: 'updated_date' })
     const insert = sut.getInsertQuery([{ title: 'Toto', tokens: 'myToken', reference: 1 }])
@@ -199,6 +205,12 @@ describe('QueryBuilder.getUpdateQuery', () => {
     const sut = new QueryBuilder({ name: 'articles', schema: 'secured' }, null, { update: 'updated_date' })
     const update = sut.getUpdateQuery({ title: 'Toto', tokens: 'myToken' })
     expect(update.text).to.be.equal('UPDATE secured.articles SET title = $1, tokens = $2, updated_date = now() RETURNING *')
+    expect(update.values).to.be.eql(['Toto', 'myToken'])
+  })
+  it('Should generate SQL UPDATE query with timestamped columns for update without base order', () => {
+    const sut = new QueryBuilder({ name: 'articles', schema: 'secured' }, null, { update: 'updated_date' })
+    const update = sut.getUpdateQuery({ title: 'Toto', updated_date: 'value', tokens: 'myToken' })
+    expect(update.text).to.be.equal('UPDATE secured.articles SET title = $1, updated_date = now(), tokens = $2 RETURNING *')
     expect(update.values).to.be.eql(['Toto', 'myToken'])
   })
   it('Should generate SQL UPDATE query with timestamped columns for insert & update with updated columns related to timestamped columns', () => {
