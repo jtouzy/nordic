@@ -52,8 +52,9 @@ class Dao {
     return this.$dataProxy.databaseToObject(result[0])
   }
   async updateWithConditions(object, conditions) {
+    const convertedObject = this.$toDatabaseObject(object)
     const conditionsObject = this.$getConditionsObjectFromArgument(conditions)
-    const updatedValues = this.$getUpdatedValuesFrom(object, conditionsObject)
+    const updatedValues = this.$getUpdatedValuesFrom(convertedObject, conditionsObject)
     const query = this.$queryBuilder.getUpdateQuery(updatedValues, conditionsObject)
     const result = await this.$databaseProxy.queryWithTransaction(query)
     return this.$dataProxy.databaseToObject(result)

@@ -257,15 +257,27 @@ describe('Dao.update', () => {
 })
 
 describe('Dao.updateWithConditions', () => {
-  it('Should send SQL UPDATE to database proxy', async () => {
+  it('Should send SQL UPDATE to database proxy (underscores as updated)', async () => {
     // Given
     const dao = DataSetProvider.getDao_withTableMetadata_withColumns_withOnePrimaryKey_requiredColumns_withMockedDatabaseProxy()
     const databaseProxy = dao.$databaseProxy
     // When
-    await dao.updateWithConditions({ title: 'Toto' }, { title: 'Titi' })
+    await dao.updateWithConditions({ articleId: 'Toto' }, { title: 'Titi' })
     // Expect
     expect(databaseProxy.$queries).to.be.eql([{
-      text: 'UPDATE secured.articles SET title = $1 WHERE title = $2 RETURNING *',
+      text: 'UPDATE secured.articles SET article_id = $1 WHERE title = $2 RETURNING *',
+      values: ['Toto', 'Titi']
+    }])
+  })
+  it('Should send SQL UPDATE to database proxy (underscores as conditions)', async () => {
+    // Given
+    const dao = DataSetProvider.getDao_withTableMetadata_withColumns_withOnePrimaryKey_requiredColumns_withMockedDatabaseProxy()
+    const databaseProxy = dao.$databaseProxy
+    // When
+    await dao.updateWithConditions({ title: 'Toto' }, { articleId: 'Titi' })
+    // Expect
+    expect(databaseProxy.$queries).to.be.eql([{
+      text: 'UPDATE secured.articles SET title = $1 WHERE article_id = $2 RETURNING *',
       values: ['Toto', 'Titi']
     }])
   })
