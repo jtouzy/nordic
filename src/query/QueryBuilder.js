@@ -2,21 +2,50 @@ class QueryBuilder {
   constructor(tableMetadata, propertiesMapping, timeStampedColumns) {
     this.$tableMetadata = tableMetadata
     this.$propertiesMapping = propertiesMapping
-    this.$timeStampedColumns = timeStampedColumns
+    this.$timeStampedColumns = this.$buildDefaultTimeStampedColumns(timeStampedColumns)
     this.$timeStampedColumnToken = '$NOW'
     this.$initializeDefaultPropertiesMapping()
+  }
+  $buildDefaultTimeStampedColumns(timeStampedColumns) {
+    if (timeStampedColumns) {
+      const storedTimeStampedColumns = {}
+      const insertColumn = timeStampedColumns.insert
+      if (insertColumn) {
+        if (typeof insertColumn === 'string') {
+          storedTimeStampedColumns.insert = {
+            column: insertColumn,
+            usage: 'now()'
+          }
+        } else {
+          storedTimeStampedColumns.insert = insertColumn
+        }
+      }
+      const updateColumn = timeStampedColumns.update
+      if (updateColumn) {
+        if (typeof updateColumn === 'string') {
+          storedTimeStampedColumns.update = {
+            column: updateColumn,
+            usage: 'now()'
+          }
+        } else {
+          storedTimeStampedColumns.update = updateColumn
+        }
+      }
+      return storedTimeStampedColumns
+    }
+    return undefined
   }
   $initializeDefaultPropertiesMapping() {
     if (this.$hasTimeStampedColumnsForInsert() || this.$hasTimeStampedColumnsForUpdate()) {
       const propertiesMapping = this.$propertiesMapping || {}
       if (this.$hasTimeStampedColumnsForUpdate()) {
-        propertiesMapping[this.$timeStampedColumns.update] = (item, value, operation) => {
-          return operation === 'INSERT' ? value : 'now()'
+        propertiesMapping[this.$timeStampedColumns.update.column] = (item, value, operation) => {
+          return operation === 'INSERT' ? value : this.$timeStampedColumns.update.usage
         }
       }
       if (this.$hasTimeStampedColumnsForInsert()) {
-        propertiesMapping[this.$timeStampedColumns.insert] = (item, value, operation) => { 
-          return operation === 'INSERT' ? 'now()' : value
+        propertiesMapping[this.$timeStampedColumns.insert.column] = (item, value, operation) => { 
+          return operation === 'INSERT' ? this.$timeStampedColumns.insert.usage : value
         }
       }
       this.$propertiesMapping = propertiesMapping
@@ -110,17 +139,17 @@ class QueryBuilder {
       return createdItems
     }
     return createdItems.map((item) => {
-      if (item.hasOwnProperty(this.$timeStampedColumns.insert)) {
+      if (item.hasOwnProperty(this.$timeStampedColumns.insert.column)) {
         return item  
       }
-      return Object.assign(item, { [this.$timeStampedColumns.insert]: this.$timeStampedColumnToken })
+      return Object.assign(item, { [this.$timeStampedColumns.insert.column]: this.$timeStampedColumnToken })
     })
   }
   $appendTimeStampedColumnsForUpdate(updatedValues) {
-    if (!this.$hasTimeStampedColumnsForUpdate() || updatedValues.hasOwnProperty(this.$timeStampedColumns.update)) {
+    if (!this.$hasTimeStampedColumnsForUpdate() || updatedValues.hasOwnProperty(this.$timeStampedColumns.update.column)) {
       return updatedValues
     }
-    return Object.assign(updatedValues, { [this.$timeStampedColumns.update]: this.$timeStampedColumnToken })
+    return Object.assign(updatedValues, { [this.$timeStampedColumns.update.column]: this.$timeStampedColumnToken })
   }
   $appendWhereConditionIfNeeded(query, conditions, appendReturning = true) {
     const hasConditions = conditions && conditions.values && conditions.values.length > 0
