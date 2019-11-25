@@ -25,14 +25,14 @@ class Nordic {
       this.$databaseMetadata = JSON.parse(fileContent)
     }
   }
-  async getDao(daoClassOrEntityProperties) {
+  async getDao(daoClassOrEntityProperties, daoContextOptions) {
     const entityContext = EntityContextFactory.from(daoClassOrEntityProperties)
     const tableMetadata = await this.getTableMetadata(entityContext)
-    const daoContext = {
+    const daoContext = Object.assign(daoContextOptions, {
       tableMetadata,
       databaseProxy: this.$databaseProxy,
       dataProxy: this.$dataProxy
-    }
+    })
     if (daoClassOrEntityProperties instanceof Function) {
       return new daoClassOrEntityProperties(daoContext)
     } else {
