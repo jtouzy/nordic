@@ -123,7 +123,7 @@ class QueryBuilder {
     }
   }
   getFromClauseWithTableMetadata() {
-    return `${this.getTableWithSchemaClause()} AS ${this.$tableMetadata.name}`
+    return `${this.getTableWithSchemaClause()} AS "${this.$tableMetadata.name}"`
   }
   getTableWithSchemaClause() {
     return `${this.$tableMetadata.schema}.${this.$tableMetadata.name}`

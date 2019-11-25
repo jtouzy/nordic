@@ -20,7 +20,7 @@ describe('Dao.findAll', () => {
     await dao.findAll()
     // Expect
     expect(databaseProxy.$queries).to.be.eql([{
-      text: 'SELECT * FROM secured.articles AS articles',
+      text: 'SELECT * FROM secured.articles AS "articles"',
       values: []
     }])
   })
@@ -56,7 +56,7 @@ describe('Dao.find', () => {
     await dao.find()
     // Expect
     expect(databaseProxy.$queries).to.be.eql([{
-      text: 'SELECT * FROM secured.articles AS articles',
+      text: 'SELECT * FROM secured.articles AS "articles"',
       values: []
     }])
   })
@@ -68,7 +68,7 @@ describe('Dao.find', () => {
     await dao.find({ articleId: 1 })
     // Expect
     expect(databaseProxy.$queries).to.be.eql([{
-      text: 'SELECT * FROM secured.articles AS articles WHERE article_id = $1',
+      text: 'SELECT * FROM secured.articles AS "articles" WHERE article_id = $1',
       values: [1]
     }])
   })
@@ -80,7 +80,7 @@ describe('Dao.find', () => {
     await dao.find({ edited: false })
     // Expect
     expect(databaseProxy.$queries).to.be.eql([{
-      text: 'SELECT * FROM secured.articles AS articles WHERE edited = $1',
+      text: 'SELECT * FROM secured.articles AS "articles" WHERE edited = $1',
       values: [false]
     }])
   })
@@ -115,7 +115,7 @@ describe('Dao.findOne', () => {
     await dao.findOne({ articleId: 1 })
     // Expect
     expect(databaseProxy.$queries).to.be.eql([{
-      text: 'SELECT * FROM secured.articles AS articles WHERE article_id = $1',
+      text: 'SELECT * FROM secured.articles AS "articles" WHERE article_id = $1',
       values: [1]
     }])
   })
@@ -148,7 +148,7 @@ describe('Dao.count', () => {
     await dao.count()
     // Expect
     expect(databaseProxy.$queries).to.be.eql([{
-      text: 'SELECT COUNT(*) as count FROM secured.articles AS articles',
+      text: 'SELECT COUNT(*) as count FROM secured.articles AS "articles"',
       values: []
     }])
   })
@@ -160,7 +160,7 @@ describe('Dao.count', () => {
     await dao.count({ articleId: 1 })
     // Expect
     expect(databaseProxy.$queries).to.be.eql([{
-      text: 'SELECT COUNT(*) as count FROM secured.articles AS articles WHERE article_id = $1',
+      text: 'SELECT COUNT(*) as count FROM secured.articles AS "articles" WHERE article_id = $1',
       values: [1]
     }])
   })
