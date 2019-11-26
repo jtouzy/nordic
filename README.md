@@ -206,6 +206,22 @@ An other way is available if you don't want to generate a metadata file (if you 
 }
 ```
 
+#### Custom parsers
+
+You can define custom parsers if you want to change the way that the pg library fetches and transform your database data. You can see more options [here](https://github.com/brianc/node-pg-types).
+
+To send custom parsers to the pg library :
+
+```javascript
+{
+  parsers: {
+    [1114]: (newValue) => { return 'replaced_value' }
+  }
+}
+```
+
+*1114 is the PostgreSQL code for a TIMESTAMP column.
+
 ### Writing your own dao classes
 
 You can customize your dao instances with your additional functions by overriding Dao class. You must provide an entity() static function to allow nordic to retrieve the linked table.
