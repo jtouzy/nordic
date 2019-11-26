@@ -1,4 +1,4 @@
-const { Client } = require('pg')
+const { Client, types } = require('pg')
 const DatabaseToJavascriptTranslator = require('./DatabaseToJavascriptTranslator')
 
 class DatabaseProxy {
@@ -7,7 +7,16 @@ class DatabaseProxy {
     this.$isConnected = false
     this.$isTransactionInProgress = false
     this.$translator = new DatabaseToJavascriptTranslator({ metadata })
-    this.$logger = (options || {}).logger
+    const { logger, parsers } = (options || {})
+    this.$logger = logger
+    this.$initializeParsers(parsers)
+  }
+  $initializeParsers(parsers) {
+    if (parsers) {
+      Object.keys(parsers).forEach((databaseType) => {
+        types.setTypeParser(Number(databaseType), parsers[databaseType])
+      })
+    }
   }
   async $connectIfNeeded() {
     if (!this.$isConnected) {
