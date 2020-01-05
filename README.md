@@ -124,7 +124,12 @@ const myItem = await articlesDao.findOne({ articleId: 1 })
 await articlesDao.delete(myItem)
 // >> DELETE FROM articles WHERE title = 'My title'
 await articlesDao.deleteWithConditions({ title: 'My title' })
+
+// 8 / More complex queries
+await nordic.rawQuery('DELETE FROM article WHERE provider IN (SELECT id FROM provider WHERE state = 'INACTIVE')')
 ```
+
+NOTE: For performance reasons, if you want your items returned after executing an INSERT/UPDATE/DELETE in a raw query, you need to add `RETURNING *` to your raw query. Otherwise, nothing is returned.
 
 ### Transactional mode
 
