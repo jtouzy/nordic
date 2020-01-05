@@ -10,7 +10,7 @@ class DatabaseToJavascriptTranslator {
     if (!this.$databaseMetadata) {
       return result.rows
     }
-    const resultTypeMapping = result.fields
+    const resultTypeMapping = (result.fields || [])
       .map((field) => ({
         name: field.name, type: this.$databaseMetadata.dataTypes[field.dataTypeID]
       }))
