@@ -34,6 +34,9 @@ class DatabaseToJavascriptTranslator {
     if (!value.startsWith('{') || !value.endsWith('}')) {
       return value
     }
+    if (value === '{}') {
+      return []
+    }
     return value.substring(1, value.length - 1).split(',')
   }
 }

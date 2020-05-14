@@ -27,4 +27,14 @@ describe('DatabaseToJavascriptTranslator.translate', () => {
     })
     expect(result).to.be.eql([{ id: '1', producers: ['TEST1','TEST2'] }, { id: '2', producers: null }])
   })
+  it('Should translate if ARRAY column is present in metadata, with empty array value', () => {
+    const sut = new DatabaseToJavascriptTranslator({
+      metadata: { dataTypes: { '100': 'TEXT', '300': 'ARRAY' } }
+    })
+    const result = sut.translate({ 
+      rows: [{ id: '1', producers: '{}' }, { id: '2', producers: null }],
+      fields: [{ name: 'id', dataTypeID: '200' }, { name: 'producers', dataTypeID: '300' }]
+    })
+    expect(result).to.be.eql([{ id: '1', producers: [] }, { id: '2', producers: null }])
+  })
 })
